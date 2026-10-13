@@ -2,8 +2,6 @@
 App::uses('AppShell', 'Console/Command');
 App::uses('ConnectionManager', 'Model');
 App::uses('Model', 'Model');
-App::uses('UploadBehavior', 'Upload.Model/Behavior');
-App::uses('ShellUploadBehavior', 'Upload.Model/Behavior');
 
 /**
  * Thumbnail Shell
@@ -31,50 +29,55 @@ class ThumbnailShell extends AppShell {
  * @return void
  */
 	public function generate() {
-		$modelName = $this->in(__('Which model would you like to regenerate thumbnails for?'));
+		$modelName = $this->in(__d('upload', 'Which model would you like to regenerate thumbnails for?'));
 
 		try {
 			$this->loadModel($modelName);
 		} catch (Exception $exc) {
-			$this->out(__('<error>' . $exc->getMessage() . '</error>'));
-			exit;
+			return $this->error($exc->getMessage());
 		}
 
-		if ($this->{$modelName}::class === 'AppModel') {
-			$this->out(__("<error>Model '$modelName' not found.</error>"));
-			exit;
+		[, $modelName] = pluginSplit($modelName);
+		$Model = $this->{$modelName};
+
+		if ($Model::class === 'AppModel') {
+			return $this->error(__d('upload', "Model '%s' not found.", $modelName));
 		}
 
-		if (!$this->{$modelName}->Behaviors->attached('Upload')) {
-			$this->out(__("<error>Model '$modelName' does not use the Upload behavior.</error>"));
-			exit;
+		$behaviorName = null;
+		foreach (['Upload', 'FileImport', 'FileGrabber'] as $name) {
+			if ($Model->Behaviors->attached($name)) {
+				$behaviorName = $name;
+				break;
+			}
 		}
 
-		$uploadBehavior = new ShellUploadBehavior;
-		$behaviorConfig = $this->{$modelName}->actsAs['Upload.Upload'];
+		if ($behaviorName === null) {
+			return $this->error(__d('upload', "Model '%s' does not use the Upload behavior.", $modelName));
+		}
+
+		$Behavior = $Model->Behaviors->{$behaviorName};
+		$behaviorConfig = $Behavior->settings[$Model->alias];
 
 		foreach ($behaviorConfig as $field => $config) {
-			$mergedConfig = array_merge($uploadBehavior->defaults, $config);
+			$dirField = $config['fields']['dir'];
 
-			$options = [
-				'isThumbnail' => true,
-				'path' => $mergedConfig['path'],
-				'rootDir' => $mergedConfig['rootDir'],
-			];
+			// The source file is re-saved in place, so it must not be removed as an "old" file
+			$Behavior->uploadSettings($Model, $field, 'deleteOnUpdate', false);
 
-			$files = $this->{$modelName}->find('all', [
-				'fields' => [$this->{$modelName}->primaryKey, $field, $mergedConfig['fields']['dir']],
+			$files = $Model->find('all', [
+				'fields' => [$Model->primaryKey, $field, $dirField],
 				'conditions' => [
-					$modelName . '.' . $field . " IS NOT NULL"
-				]
+					$Model->alias . '.' . $field . ' IS NOT NULL'
+				],
+				'recursive' => -1,
 			]);
 
 			foreach ($files as $file) {
-				$this->{$modelName}->Behaviors->load('ShellUpload', $behaviorConfig);
-				$sourceFilePath = $this->{$modelName}->path($field, $options) . $file[$modelName][$mergedConfig['fields']['dir']] . DS . $file[$modelName][$field];
-				$this->{$modelName}->Behaviors->unload('ShellUpload');
+				$record = $file[$Model->alias];
+				$sourceFilePath = $config['path'] . $record[$dirField] . DS . $record[$field];
 
-				if (!file_exists($sourceFilePath)) {
+				if (!is_file($sourceFilePath)) {
 					continue;
 				}
 
@@ -88,23 +91,25 @@ class ThumbnailShell extends AppShell {
 				];
 
 				$data = [
-					$this->{$modelName}->primaryKey => $file[$modelName][$this->{$modelName}->primaryKey],
+					$Model->primaryKey => $record[$Model->primaryKey],
 					$field => $fieldData,
-					$config['fields']['dir'] => $file[$modelName][$this->{$modelName}->primaryKey],
 				];
 
-				if ($this->{$modelName}->hasField('modified')) {
+				if ($Model->hasField('modified')) {
 					$data['modified'] = false;
 				}
 
-				$this->{$modelName}->set($data);
+				$Model->create();
+				$Model->set($data);
 
-				if ($this->{$modelName}->save(null, false)) {
-					$this->out(__("Created thumbnails in {$file[$modelName][$mergedConfig['fields']['dir']]} for {$file[$modelName][$field]}"));
+				if ($Model->save(null, false)) {
+					$this->out(__d('upload', 'Created thumbnails in %s for %s', $record[$dirField], $record[$field]));
 				} else {
-					$this->out(__("<error> Could not create thumbnails in {$file[$modelName][$mergedConfig['fields']['dir']]} for {$file[$modelName][$field]}</error>"));
+					$this->err(__d('upload', '<error>Could not create thumbnails in %s for %s</error>', $record[$dirField], $record[$field]));
 				}
 			}
+
+			$Behavior->uploadSettings($Model, $field, 'deleteOnUpdate', $config['deleteOnUpdate']);
 		}
 	}
 }
