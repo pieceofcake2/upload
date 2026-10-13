@@ -19,6 +19,10 @@ You can run the shell from the command line as you would any cake shell.
 
 .. code:: bash
 
-    Console/cake upload.thumbnail generate
+    bin/cake Upload.thumbnail generate
+
+    # classic app/ layout
+    Console/cake Upload.thumbnail generate
 
 You will then be asked which model you want to process, and the shell will then process your images.
+The model must use the ``Upload.Upload`` (or ``Upload.FileImport``) behavior.

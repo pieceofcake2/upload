@@ -55,7 +55,9 @@ passed in under each field in your behavior configuration.
 -  ``rootDir``: Root directory for moving images. Auto-prepended to
    ``path`` and ``thumbnailPath`` where necessary
 
-   -  Default (string) ``ROOT . DS . APP_DIR . DS``
+   -  Default (string) ``dirname(WWW_ROOT) . DS`` (the parent directory
+      of the webroot), or ``ROOT . DS . APP_DIR . DS`` when ``WWW_ROOT``
+      is not defined
 
 -  ``mimetypes``: Array of mimetypes to use for validation
 
