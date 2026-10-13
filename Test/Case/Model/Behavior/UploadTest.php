@@ -6,14 +6,14 @@ class TestUpload extends CakeTestModel {
 
 	public $useTable = 'uploads';
 
-	public $actsAs = array(
-		'Upload.Upload' => array(
-			'photo' => array(
+	public $actsAs = [
+		'Upload.Upload' => [
+			'photo' => [
 				'thumbnailMethod' => '_bad_thumbnail_method_',
 				'pathMethod' => '_bad_path_method_',
-			)
-		)
-	);
+			]
+		]
+	];
 
 }
 
@@ -21,36 +21,36 @@ class TestUploadTwo extends CakeTestModel {
 
 	public $useTable = 'uploads';
 
-	public $actsAs = array(
-		'Upload.Upload' => array(
-			'photo' => array(
-				'fields' => array(
+	public $actsAs = [
+		'Upload.Upload' => [
+			'photo' => [
+				'fields' => [
 					'type' => 'type',
 					'dir' => 'dir'
-				),
-				'mimetypes' => array(
+				],
+				'mimetypes' => [
 					'image/png',
 					'image/jpeg',
 					'image/gif'
-				),
-				'thumbnailSizes' => array(
+				],
+				'thumbnailSizes' => [
 					'thumb' => '80h'
-				)
-			)
-		)
-	);
+				]
+			]
+		]
+	];
 
 }
 
 class UploadBehaviorTest extends CakeTestCase {
 
-	public $fixtures = array('plugin.upload.upload');
+	public $fixtures = ['plugin.upload.upload'];
 
 	public $TestUpload = null;
 
 	public $MockUpload = null;
 
-	public $data = array();
+	public $data = [];
 
 	public $currentTestMethod;
 
@@ -64,54 +64,54 @@ class UploadBehaviorTest extends CakeTestCase {
 		$this->TestUpload = ClassRegistry::init('TestUpload');
 		$this->TestUploadTwo = ClassRegistry::init('TestUploadTwo');
 		$this->currentTestMethod = $method;
-		$this->data['test_empty'] = array(
+		$this->data['test_empty'] = [
 			'photo' => ''
-		);
-		$this->data['test_ok'] = array(
-			'photo' => array(
+		];
+		$this->data['test_ok'] = [
+			'photo' => [
 				'name' => 'Photo.png',
 				'tmp_name' => 'Photo.png',
 				'dir' => '/tmp/php/file.tmp',
 				'type' => 'image/png',
 				'size' => 8192,
 				'error' => UPLOAD_ERR_OK,
-			)
-		);
-		$this->data['test_ok_bmp'] = array(
-			'photo' => array(
+			]
+		];
+		$this->data['test_ok_bmp'] = [
+			'photo' => [
 				'name' => 'Photo.bmp',
 				'tmp_name' => 'Photo.bmp',
 				'dir' => '/tmp/php/file.tmp',
 				'type' => 'image/bmp',
 				'size' => 8192,
 				'error' => UPLOAD_ERR_OK,
-			)
-		);
-		$this->data['test_update'] = array(
+			]
+		];
+		$this->data['test_update'] = [
 			'id' => 1,
-			'photo' => array(
+			'photo' => [
 				'name' => 'NewPhoto.png',
 				'tmp_name' => 'PhotoTmp.png',
 				'dir' => '/tmp/php/file.tmp',
 				'type' => 'image/png',
 				'size' => 8192,
 				'error' => UPLOAD_ERR_OK,
-			)
-		);
-		$this->data['test_update_other_field'] = array(
+			]
+		];
+		$this->data['test_update_other_field'] = [
 			'id' => 1,
 			'other_field' => 'test',
-			'photo' => array()
-		);
-		$this->data['test_update_other_field_without_photo_set'] = array(
+			'photo' => []
+		];
+		$this->data['test_update_other_field_without_photo_set'] = [
 			'id' => 1,
 			'other_field' => 'test',
-		);
-		$this->data['test_remove'] = array(
-			'photo' => array(
+		];
+		$this->data['test_remove'] = [
+			'photo' => [
 				'remove' => true,
-			)
-		);
+			]
+		];
 	}
 
 /**
@@ -120,12 +120,12 @@ class UploadBehaviorTest extends CakeTestCase {
  * @param array $methods array of methods to mock
  * @return void
  */
-	public function mockUpload($methods = array()) {
+	public function mockUpload($methods = []) {
 		if (!is_array($methods)) {
 			$methods = (array)$methods;
 		}
 		if (empty($methods)) {
-			$methods = array('handleUploadedFile', 'unlink', '_getMimeType', '_createThumbnails');
+			$methods = ['handleUploadedFile', 'unlink', '_getMimeType', '_createThumbnails'];
 		}
 		$this->MockUpload = $this->getMock('UploadBehavior', $methods);
 
@@ -167,13 +167,13 @@ class UploadBehaviorTest extends CakeTestCase {
 	}
 
 	public function testSetup() {
-		$this->mockUpload(array('handleUploadedFile', 'unlink'));
+		$this->mockUpload(['handleUploadedFile', 'unlink']);
 		$this->assertEquals('_resizeImagick', $this->MockUpload->settings['TestUpload']['photo']['thumbnailMethod']);
 		$this->assertEquals('_getPathPrimaryKey', $this->MockUpload->settings['TestUpload']['photo']['pathMethod']);
 	}
 
 	public function testUploadSettings() {
-		$this->mockUpload(array('handleUploadedFile', 'unlink'));
+		$this->mockUpload(['handleUploadedFile', 'unlink']);
 		$this->assertEquals('_resizeImagick', $this->MockUpload->settings['TestUpload']['photo']['thumbnailMethod']);
 		$this->assertEquals('_getPathPrimaryKey', $this->MockUpload->settings['TestUpload']['photo']['pathMethod']);
 
@@ -181,14 +181,14 @@ class UploadBehaviorTest extends CakeTestCase {
 		$this->assertEquals('_resizePhp', $this->MockUpload->settings['TestUpload']['photo']['thumbnailMethod']);
 		$this->assertEquals('_getPathPrimaryKey', $this->MockUpload->settings['TestUpload']['photo']['pathMethod']);
 
-		$this->TestUpload->uploadSettings('photo', array(
+		$this->TestUpload->uploadSettings('photo', [
 			'thumbnailMethod' => '_resizeImagick',
 			'pathMethod' => '_getPathFlat',
-		));
+		]);
 		$this->assertEquals('_resizeImagick', $this->MockUpload->settings['TestUpload']['photo']['thumbnailMethod']);
 		$this->assertEquals('_getPathFlat', $this->MockUpload->settings['TestUpload']['photo']['pathMethod']);
 
-		$this->TestUpload->uploadSettings('photo', array('pathMethod', 'thumbnailQuality'), array('_getPathPrimaryKey', 100));
+		$this->TestUpload->uploadSettings('photo', ['pathMethod', 'thumbnailQuality'], ['_getPathPrimaryKey', 100]);
 		$this->assertEquals('_resizeImagick', $this->MockUpload->settings['TestUpload']['photo']['thumbnailMethod']);
 		$this->assertEquals('_getPathPrimaryKey', $this->MockUpload->settings['TestUpload']['photo']['pathMethod']);
 		$this->assertEquals(100, $this->MockUpload->settings['TestUpload']['photo']['thumbnailQuality']);
@@ -212,16 +212,16 @@ class UploadBehaviorTest extends CakeTestCase {
 
 		$id = $this->TestUpload->id;
 		$newRecord = $this->TestUpload->findById($id);
-		$expectedRecord = array(
-			'TestUpload' => array(
+		$expectedRecord = [
+			'TestUpload' => [
 				'id' => $id,
 				'photo' => null,
 				'dir' => null,
 				'type' => null,
 				'size' => null,
 				'other_field' => null
-			)
-		);
+			]
+		];
 
 		$this->assertEquals($expectedRecord, $newRecord);
 	}
@@ -241,16 +241,16 @@ class UploadBehaviorTest extends CakeTestCase {
 
 		$id = $this->TestUpload->id;
 		$newRecord = $this->TestUpload->findById($id);
-		$expectedRecord = array(
-			'TestUpload' => array(
+		$expectedRecord = [
+			'TestUpload' => [
 				'id' => $id,
 				'photo' => 'Photo.png',
 				'dir' => 3,
 				'type' => 'image/png',
 				'size' => 8192,
 				'other_field' => null
-			)
-		);
+			]
+		];
 
 		$this->assertEquals($expectedRecord, $newRecord);
 	}
@@ -264,20 +264,20 @@ class UploadBehaviorTest extends CakeTestCase {
  **/
 	public function testSaveSuccessPngDefaultPathAndPathMethod() {
 		$this->mockUpload();
-		$nextId = (1 + $this->TestUploadTwo->field('id', array(), array('TestUploadTwo.id' => 'DESC')));
+		$nextId = (1 + $this->TestUploadTwo->field('id', [], ['TestUploadTwo.id' => 'DESC']));
 		$destinationDir = APP . 'webroot' . DS . 'files' . DS . 'test_upload_two' . DS . 'photo' . DS . $nextId . DS;
 
-		$Upload = array(
-			'TestUploadTwo' => array(
-				'photo' => array(
+		$Upload = [
+			'TestUploadTwo' => [
+				'photo' => [
 					'name' => 'image-png.png',
 					'type' => 'image/png',
 					'tmp_name' => 'image-png-tmp.png',
 					'error' => UPLOAD_ERR_OK,
 					'size' => 8123,
-				)
-			)
-		);
+				]
+			]
+		];
 
 		$this->MockUpload->expects($this->never())
 			->method('unlink');
@@ -303,16 +303,16 @@ class UploadBehaviorTest extends CakeTestCase {
 			->will($this->returnValue(true));
 
 		$this->assertTrue(false !== $this->TestUploadTwo->save($Upload));
-		$this->assertSame(array(), array_keys($this->TestUploadTwo->validationErrors));
+		$this->assertSame([], array_keys($this->TestUploadTwo->validationErrors));
 
-		$this->assertSame('image-png.png', $this->TestUploadTwo->field('photo', array('TestUploadTwo.id' => $nextId)));
-		$this->assertSame('image/png', $this->TestUploadTwo->field('type', array('TestUploadTwo.id' => $nextId)));
-		$this->assertSame((string)$nextId, $this->TestUploadTwo->field('dir', array('TestUploadTwo.id' => $nextId)));
+		$this->assertSame('image-png.png', $this->TestUploadTwo->field('photo', ['TestUploadTwo.id' => $nextId]));
+		$this->assertSame('image/png', $this->TestUploadTwo->field('type', ['TestUploadTwo.id' => $nextId]));
+		$this->assertSame((string)$nextId, $this->TestUploadTwo->field('dir', ['TestUploadTwo.id' => $nextId]));
 	}
 
 	public function testSaveDirEscaped() {
 		$this->TestUpload->actsAs['Upload.Upload']['photo']['pathMethod'] = 'random';
-		$this->mockUpload(array('handleUploadedFile', 'unlink', '_getMimeType', '_createThumbnails', '_getPathRandom'));
+		$this->mockUpload(['handleUploadedFile', 'unlink', '_getMimeType', '_createThumbnails', '_getPathRandom']);
 
 		$DS = '\\';
 		$randomPath = '01' . $DS . '02' . $DS . '03';
@@ -436,12 +436,12 @@ class UploadBehaviorTest extends CakeTestCase {
 		$this->mockUpload();
 		$this->MockUpload->expects($this->once())->method('unlink')->will($this->returnValue(true));
 
-		$data = array(
+		$data = [
 			'id' => 1,
-			'photo' => array(
+			'photo' => [
 				'remove' => true
-			)
-		);
+			]
+		];
 
 		$existingRecord = $this->TestUpload->findById($data['id']);
 		$this->MockUpload->expects($this->once())->method('unlink')->with(
@@ -455,12 +455,12 @@ class UploadBehaviorTest extends CakeTestCase {
 		$this->mockUpload();
 		$this->MockUpload->expects($this->never())->method('unlink');
 
-		$data = array(
+		$data = [
 			'id' => 1,
-			'photo' => array(
+			'photo' => [
 				'remove' => false
-			)
-		);
+			]
+		];
 
 		$existingRecord = $this->TestUpload->findById($data['id']);
 		$result = $this->TestUpload->save($data);
@@ -471,12 +471,12 @@ class UploadBehaviorTest extends CakeTestCase {
 		$this->mockUpload();
 		$this->MockUpload->expects($this->never())->method('unlink');
 
-		$data = array(
+		$data = [
 			'id' => 1,
-			'photo' => array(
+			'photo' => [
 				'remove' => null
-			)
-		);
+			]
+		];
 
 		$existingRecord = $this->TestUpload->findById($data['id']);
 		$result = $this->TestUpload->save($data);
@@ -490,7 +490,7 @@ class UploadBehaviorTest extends CakeTestCase {
  * @expectedException UploadException
  **/
 	public function testMoveFileExecption() {
-		$this->mockUpload(array('handleUploadedFile'));
+		$this->mockUpload(['handleUploadedFile']);
 		$this->MockUpload->expects($this->once())->method('handleUploadedFile')->will($this->returnValue(false));
 		$result = $this->TestUpload->save($this->data['test_ok']);
 	}
@@ -504,39 +504,39 @@ class UploadBehaviorTest extends CakeTestCase {
  * @return void
  * @dataProvider providerTestValidationRules
  **/
-	public function testValidationRules($rule, $data, $record = array()) {
-		$this->TestUpload->validate = array(
-			'photo' => array(
-				$rule => array(
+	public function testValidationRules($rule, $data, $record = []) {
+		$this->TestUpload->validate = [
+			'photo' => [
+				$rule => [
 					'rule' => $rule,
 					'message' => $rule
-				),
-			)
-		);
+				],
+			]
+		];
 
-		$data = array_merge(array(
-			'photo' => array_merge(array(
+		$data = array_merge([
+			'photo' => array_merge([
 				'tmp_name' => 'Photo.png',
 				'dir' => '/tmp/php/file.tmp',
 				'type' => 'image/png',
 				'size' => 8192,
-			), $data
-		), $record));
+			], $data
+		), $record]);
 
 		$this->__testInvalidValidationRule($rule, $data);
 		$this->__testOkAndRemoveCasesValidate();
 	}
 
 	public function providerTestValidationRules() {
-		return array(
-			array('isUnderPhpSizeLimit', array('error' => UPLOAD_ERR_INI_SIZE)),
-			array('isUnderFormSizeLimit', array('error' => UPLOAD_ERR_FORM_SIZE)),
-			array('isCompletedUpload', array('error' => UPLOAD_ERR_PARTIAL)),
-			array('isFileUpload', array('error' => UPLOAD_ERR_NO_FILE)),
-			array('isFileUploadOrHasExistingValue', array('error' => UPLOAD_ERR_NO_FILE), array('id' => 2)),
-			array('isFileUploadOrHasExistingValue', array('error' => UPLOAD_ERR_NO_FILE), array('id' => '')),
-			array('isFileUploadOrHasExistingValue', array('error' => UPLOAD_ERR_NO_FILE)),
-		);
+		return [
+			['isUnderPhpSizeLimit', ['error' => UPLOAD_ERR_INI_SIZE]],
+			['isUnderFormSizeLimit', ['error' => UPLOAD_ERR_FORM_SIZE]],
+			['isCompletedUpload', ['error' => UPLOAD_ERR_PARTIAL]],
+			['isFileUpload', ['error' => UPLOAD_ERR_NO_FILE]],
+			['isFileUploadOrHasExistingValue', ['error' => UPLOAD_ERR_NO_FILE], ['id' => 2]],
+			['isFileUploadOrHasExistingValue', ['error' => UPLOAD_ERR_NO_FILE], ['id' => '']],
+			['isFileUploadOrHasExistingValue', ['error' => UPLOAD_ERR_NO_FILE]],
+		];
 	}
 
 /**
@@ -548,40 +548,40 @@ class UploadBehaviorTest extends CakeTestCase {
  * @return void
  * @dataProvider providerTestIgnorableValidationRules
  **/
-	public function testIgnorableValidationRules($rule, $data, $record = array()) {
-		$this->TestUpload->validate = array(
-			'photo' => array(
-				$rule => array(
+	public function testIgnorableValidationRules($rule, $data, $record = []) {
+		$this->TestUpload->validate = [
+			'photo' => [
+				$rule => [
 					'rule' => $rule,
 					'message' => $rule
-				),
-			)
-		);
+				],
+			]
+		];
 
-		$data = array_merge(array(
-			'photo' => array_merge(array(
+		$data = array_merge([
+			'photo' => array_merge([
 				'tmp_name' => 'Photo.png',
 				'dir' => '/tmp/php/file.tmp',
 				'type' => 'image/png',
 				'size' => 8192,
-			), $data
-		), $record));
+			], $data
+		), $record]);
 		$this->__testInvalidValidationRule($rule, $data);
 
-		$this->TestUpload->validate = array('photo' => array(
-			$rule => array('rule' => array($rule, false),
-		)));
-		$data = array('photo' => array('error' => UPLOAD_ERR_NO_FILE));
+		$this->TestUpload->validate = ['photo' => [
+			$rule => ['rule' => [$rule, false],
+		]]];
+		$data = ['photo' => ['error' => UPLOAD_ERR_NO_FILE]];
 		$this->__testSkipValidationRule($rule, $data);
 		$this->__testOkAndRemoveCasesValidate();
 	}
 
 	public function providerTestIgnorableValidationRules() {
-		return array(
-			array('tempDirExists', array('error' => UPLOAD_ERR_NO_TMP_DIR)),
-			array('isSuccessfulWrite', array('error' => UPLOAD_ERR_CANT_WRITE)),
-			array('noPhpExtensionErrors', array('error' => UPLOAD_ERR_EXTENSION)),
-		);
+		return [
+			['tempDirExists', ['error' => UPLOAD_ERR_NO_TMP_DIR]],
+			['isSuccessfulWrite', ['error' => UPLOAD_ERR_CANT_WRITE]],
+			['noPhpExtensionErrors', ['error' => UPLOAD_ERR_EXTENSION]],
+		];
 	}
 
 /**
@@ -592,33 +592,33 @@ class UploadBehaviorTest extends CakeTestCase {
  * @dataProvider providerTestChangeConfigurationValidationRules
  **/
 	public function testChangeConfigurationValidationRules($rule) {
-		$this->TestUpload->validate = array(
-			'photo' => array(
-				$rule => array(
+		$this->TestUpload->validate = [
+			'photo' => [
+				$rule => [
 					'rule' => $rule,
 					'message' => $rule
-				),
-			)
-		);
+				],
+			]
+		];
 
 		$this->__testInvalidValidationRule($rule, $this->data['test_ok']);
 
 		$this->TestUpload->Behaviors->detach('Upload.Upload');
-		$this->TestUpload->Behaviors->attach('Upload.Upload', array(
-			'photo' => array(
+		$this->TestUpload->Behaviors->attach('Upload.Upload', [
+			'photo' => [
 				'path' => TMP
-			)
-		));
+			]
+		]);
 
 		$this->__testOkCaseValidates();
 		$this->__testRemoveCaseValidates();
 	}
 
 	public function providerTestChangeConfigurationValidationRules() {
-		return array(
-			array('isWritable'),
-			array('isValidDir'),
-		);
+		return [
+			['isWritable'],
+			['isValidDir'],
+		];
 	}
 
 /**
@@ -628,26 +628,26 @@ class UploadBehaviorTest extends CakeTestCase {
  * @return void
  **/
 	public function testIsFileUploadOrHasExistingValueEditingWithExistingValue() {
-		$this->TestUpload->validate = array(
-			'photo' => array(
-				'isFileUploadOrHasExistingValue' => array(
+		$this->TestUpload->validate = [
+			'photo' => [
+				'isFileUploadOrHasExistingValue' => [
 					'rule' => 'isFileUploadOrHasExistingValue',
 					'message' => 'isFileUploadOrHasExistingValue'
-				),
-			)
-		);
+				],
+			]
+		];
 
 		// Fixture record #1 has an existing value.
-		$data = array(
+		$data = [
 			'id' => 1,
-			'photo' => array(
+			'photo' => [
 				'tmp_name' => 'Photo.png',
 				'dir' => '/tmp/php/file.tmp',
 				'type' => 'image/png',
 				'size' => 8192,
 				'error' => UPLOAD_ERR_NO_FILE,
-			)
-		);
+			]
+		];
 		$this->TestUpload->set($data);
 		$this->assertTrue($this->TestUpload->validates());
 		$this->assertEquals(0, count($this->TestUpload->validationErrors));
@@ -657,66 +657,66 @@ class UploadBehaviorTest extends CakeTestCase {
 
 	public function testIsValidMimeType() {
 		$this->TestUpload->Behaviors->detach('Upload.Upload');
-		$this->TestUpload->Behaviors->attach('Upload.Upload', array(
-			'photo' => array(
-				'mimetypes' => array('image/bmp', 'image/jpeg')
-			)
-		));
+		$this->TestUpload->Behaviors->attach('Upload.Upload', [
+			'photo' => [
+				'mimetypes' => ['image/bmp', 'image/jpeg']
+			]
+		]);
 
-		$this->TestUpload->validate = array(
-			'photo' => array(
-				'isValidMimeType' => array(
+		$this->TestUpload->validate = [
+			'photo' => [
+				'isValidMimeType' => [
 					'rule' => 'isValidMimeType',
 					'message' => 'isValidMimeType'
-				),
-			)
-		);
+				],
+			]
+		];
 
 		$this->__testInvalidValidationRule('isValidMimeType', $this->data['test_ok']);
 
 		$this->TestUpload->Behaviors->detach('Upload.Upload');
-		$this->TestUpload->Behaviors->attach('Upload.Upload', array(
-			'photo' => array(
-				'mimetypes' => array('image/png', 'image/jpeg')
-			)
-		));
+		$this->TestUpload->Behaviors->attach('Upload.Upload', [
+			'photo' => [
+				'mimetypes' => ['image/png', 'image/jpeg']
+			]
+		]);
 
 		$this->__testOkAndRemoveCasesValidate();
 
-		$this->TestUpload->validate = array(
-			'photo' => array(
-				'isValidMimeType' => array(
-					'rule' => array('isValidMimeType', 'image/png'),
+		$this->TestUpload->validate = [
+			'photo' => [
+				'isValidMimeType' => [
+					'rule' => ['isValidMimeType', 'image/png'],
 					'message' => 'isValidMimeType',
-				),
-			)
-		);
+				],
+			]
+		];
 
 		$this->__testOkCaseValidates();
 
-		$this->TestUpload->validate = array('photo' => array(
-			'isValidMimeType' => array('rule' => array('isValidMimeType', 'image/png', false),
-		)));
-		$data = array('photo' => array('error' => UPLOAD_ERR_NO_FILE));
+		$this->TestUpload->validate = ['photo' => [
+			'isValidMimeType' => ['rule' => ['isValidMimeType', 'image/png', false],
+		]]];
+		$data = ['photo' => ['error' => UPLOAD_ERR_NO_FILE]];
 		$this->__testSkipValidationRule('isValidMimeType', $data);
 	}
 
 	public function testIsValidExtension() {
 		$this->TestUpload->Behaviors->detach('Upload.Upload');
-		$this->TestUpload->Behaviors->attach('Upload.Upload', array(
-			'photo' => array(
-				'extensions' => array('jpeg', 'bmp')
-			)
-		));
+		$this->TestUpload->Behaviors->attach('Upload.Upload', [
+			'photo' => [
+				'extensions' => ['jpeg', 'bmp']
+			]
+		]);
 
-		$this->TestUpload->validate = array(
-			'photo' => array(
-				'isValidExtension' => array(
+		$this->TestUpload->validate = [
+			'photo' => [
+				'isValidExtension' => [
 					'rule' => 'isValidExtension',
 					'message' => 'isValidExtension'
-				),
-			)
-		);
+				],
+			]
+		];
 
 		$this->__testInvalidValidationRule('isValidExtension', $this->data['test_ok']);
 
@@ -725,34 +725,34 @@ class UploadBehaviorTest extends CakeTestCase {
 		$this->assertEquals(0, count($this->TestUpload->validationErrors));
 
 		$this->TestUpload->Behaviors->detach('Upload.Upload');
-		$this->TestUpload->Behaviors->attach('Upload.Upload', array(
+		$this->TestUpload->Behaviors->attach('Upload.Upload', [
 			'photo'
-		));
+		]);
 
-		$this->TestUpload->validate['photo']['isValidExtension']['rule'] = array('isValidExtension', 'jpg');
+		$this->TestUpload->validate['photo']['isValidExtension']['rule'] = ['isValidExtension', 'jpg'];
 		$this->__testInvalidValidationRule('isValidExtension', $this->data['test_ok']);
 
-		$this->TestUpload->validate['photo']['isValidExtension']['rule'] = array('isValidExtension', array('jpg'));
+		$this->TestUpload->validate['photo']['isValidExtension']['rule'] = ['isValidExtension', ['jpg']];
 		$this->__testInvalidValidationRule('isValidExtension', $this->data['test_ok']);
 
-		$this->TestUpload->validate['photo']['isValidExtension']['rule'] = array('isValidExtension', array('jpg', 'bmp'));
+		$this->TestUpload->validate['photo']['isValidExtension']['rule'] = ['isValidExtension', ['jpg', 'bmp']];
 		$this->__testInvalidValidationRule('isValidExtension', $this->data['test_ok']);
 
-		$this->TestUpload->validate['photo']['isValidExtension']['rule'] = array('isValidExtension', array('jpg', 'bmp', 'png'));
+		$this->TestUpload->validate['photo']['isValidExtension']['rule'] = ['isValidExtension', ['jpg', 'bmp', 'png']];
 		$this->__testOkCaseValidates();
 
-		$this->TestUpload->validate = array(
-			'photo' => array(
-				'isFileUpload' => array(
+		$this->TestUpload->validate = [
+			'photo' => [
+				'isFileUpload' => [
 					'rule' => 'isFileUpload',
 					'message' => 'isFileUpload'
-				),
-				'isValidExtension' => array(
-					'rule' => array('isValidExtension', array('jpg')),
+				],
+				'isValidExtension' => [
+					'rule' => ['isValidExtension', ['jpg']],
 					'message' => 'isValidExtension'
-				),
-			)
-		);
+				],
+			]
+		];
 
 		$this->__testInvalidValidationRule('isValidExtension', $this->data['test_ok']);
 
@@ -762,71 +762,71 @@ class UploadBehaviorTest extends CakeTestCase {
 
 		$this->__testRemoveCaseValidates();
 
-		$this->TestUpload->validate = array('photo' => array(
-			'isValidExtension' => array('rule' => array('isValidExtension', array('jpeg', 'bmp'), false),
-		)));
-		$data = array('photo' => array('error' => UPLOAD_ERR_NO_FILE));
+		$this->TestUpload->validate = ['photo' => [
+			'isValidExtension' => ['rule' => ['isValidExtension', ['jpeg', 'bmp'], false],
+		]]];
+		$data = ['photo' => ['error' => UPLOAD_ERR_NO_FILE]];
 		$this->__testSkipValidationRule('isValidExtension', $data);
 	}
 
 	public function testIsImage() {
 		$this->TestUpload->Behaviors->detach('Upload.Upload');
-		$this->TestUpload->Behaviors->attach('Upload.Upload', array(
-			'photo' => array(
-				'mimetypes' => array('image/bmp', 'image/jpeg')
-			)
-		));
+		$this->TestUpload->Behaviors->attach('Upload.Upload', [
+			'photo' => [
+				'mimetypes' => ['image/bmp', 'image/jpeg']
+			]
+		]);
 
-		$result = $this->protectedMethodCall($this->TestUpload->Behaviors->Upload, '_isImage', array(
+		$result = $this->protectedMethodCall($this->TestUpload->Behaviors->Upload, '_isImage', [
 			'image/bmp'
-		));
+		]);
 		$this->assertTrue($result);
 
-		$result = $this->protectedMethodCall($this->TestUpload->Behaviors->Upload, '_isImage', array(
+		$result = $this->protectedMethodCall($this->TestUpload->Behaviors->Upload, '_isImage', [
 			'image/jpeg'
-		));
+		]);
 		$this->assertTrue($result);
 
-		$result = $this->protectedMethodCall($this->TestUpload->Behaviors->Upload, '_isImage', array(
+		$result = $this->protectedMethodCall($this->TestUpload->Behaviors->Upload, '_isImage', [
 			'application/zip'
-		));
+		]);
 		$this->assertFalse($result);
 	}
 
 	public function testIsMedia() {
 		$this->TestUpload->Behaviors->detach('Upload.Upload');
-		$this->TestUpload->Behaviors->attach('Upload.Upload', array(
-			'pdf_file' => array(
-				'mimetypes' => array('application/pdf', 'application/postscript')
-			)
-		));
+		$this->TestUpload->Behaviors->attach('Upload.Upload', [
+			'pdf_file' => [
+				'mimetypes' => ['application/pdf', 'application/postscript']
+			]
+		]);
 
-		$result = $this->protectedMethodCall($this->TestUpload->Behaviors->Upload, '_isMedia', array(
+		$result = $this->protectedMethodCall($this->TestUpload->Behaviors->Upload, '_isMedia', [
 			'application/pdf'
-		));
+		]);
 		$this->assertTrue($result);
 
-		$result = $this->protectedMethodCall($this->TestUpload->Behaviors->Upload, '_isMedia', array(
+		$result = $this->protectedMethodCall($this->TestUpload->Behaviors->Upload, '_isMedia', [
 			'application/postscript'
-		));
+		]);
 		$this->assertTrue($result);
 
-		$result = $this->protectedMethodCall($this->TestUpload->Behaviors->Upload, '_isMedia', array(
+		$result = $this->protectedMethodCall($this->TestUpload->Behaviors->Upload, '_isMedia', [
 			'application/zip'
-		));
+		]);
 		$this->assertFalse($result);
 
-		$result = $this->protectedMethodCall($this->TestUpload->Behaviors->Upload, '_isMedia', array(
+		$result = $this->protectedMethodCall($this->TestUpload->Behaviors->Upload, '_isMedia', [
 			'image/jpeg'
-		));
+		]);
 		$this->assertFalse($result);
 	}
 
 	public function testGetPathFlat() {
 		$basePath = 'tests' . DS . 'path' . DS . 'flat' . DS;
-		$result = $this->protectedMethodCall($this->TestUpload->Behaviors->Upload, '_getPathFlat', array(
+		$result = $this->protectedMethodCall($this->TestUpload->Behaviors->Upload, '_getPathFlat', [
 			$this->TestUpload, 'photo', TMP . $basePath
-		));
+		]);
 
 		$this->assertInternalType('string', $result);
 		$this->assertEquals(0, strlen($result));
@@ -835,9 +835,9 @@ class UploadBehaviorTest extends CakeTestCase {
 	public function testGetPathPrimaryKey() {
 		$this->TestUpload->id = 5;
 		$basePath = 'tests' . DS . 'path' . DS . 'primaryKey' . DS;
-		$result = $this->protectedMethodCall($this->TestUpload->Behaviors->Upload, '_getPathPrimaryKey', array(
+		$result = $this->protectedMethodCall($this->TestUpload->Behaviors->Upload, '_getPathPrimaryKey', [
 			$this->TestUpload, 'photo', TMP . $basePath
-		));
+		]);
 
 		$this->assertInternalType('integer', $result);
 		$this->assertEquals(1, strlen($result));
@@ -847,9 +847,9 @@ class UploadBehaviorTest extends CakeTestCase {
 
 	public function testGetPathRandom() {
 		$basePath = 'tests' . DS . 'path' . DS . 'random' . DS;
-		$result = $this->protectedMethodCall($this->TestUpload->Behaviors->Upload, '_getPathRandom', array(
+		$result = $this->protectedMethodCall($this->TestUpload->Behaviors->Upload, '_getPathRandom', [
 			$this->TestUpload, 'photo', TMP . $basePath
-		));
+		]);
 
 		$this->assertInternalType('string', $result);
 		$this->assertEquals(8, strlen($result));
@@ -859,9 +859,9 @@ class UploadBehaviorTest extends CakeTestCase {
 	public function testGetPathRandomCombined() {
 		$this->TestUpload->id = 5;
 		$basePath = 'tests' . DS . 'path' . DS . 'random' . DS;
-		$result = $this->protectedMethodCall($this->TestUpload->Behaviors->Upload, '_getPathRandomCombined', array(
+		$result = $this->protectedMethodCall($this->TestUpload->Behaviors->Upload, '_getPathRandomCombined', [
 			$this->TestUpload, 'photo', TMP . $basePath
-		));
+		]);
 
 		$this->assertInternalType('string', $result);
 		$this->assertEquals(9 + strlen($this->TestUpload->id), strlen($result));
@@ -870,49 +870,49 @@ class UploadBehaviorTest extends CakeTestCase {
 	}
 
 	public function testReplacePath() {
-		$result = $this->protectedMethodCall($this->TestUpload->Behaviors->Upload, '_path', array(
-			$this->TestUpload, 'photo', array('path' => 'webroot{DS}files/{model}\\{field}{DS}')
-		));
+		$result = $this->protectedMethodCall($this->TestUpload->Behaviors->Upload, '_path', [
+			$this->TestUpload, 'photo', ['path' => 'webroot{DS}files/{model}\\{field}{DS}']
+		]);
 
 		$this->assertInternalType('string', $result);
 		$this->assertEquals(WWW_ROOT . 'files' . DIRECTORY_SEPARATOR . 'test_upload' . DIRECTORY_SEPARATOR . 'photo' . DIRECTORY_SEPARATOR, $result);
 
-		$result = $this->protectedMethodCall($this->TestUpload->Behaviors->Upload, '_path', array(
-			$this->TestUpload, 'photo', array('path' => 'webroot{DS}files//{size}/{model}\\{field}{DS}{geometry}///')
-		));
+		$result = $this->protectedMethodCall($this->TestUpload->Behaviors->Upload, '_path', [
+			$this->TestUpload, 'photo', ['path' => 'webroot{DS}files//{size}/{model}\\{field}{DS}{geometry}///']
+		]);
 
 		$this->assertInternalType('string', $result);
 		$this->assertEquals(WWW_ROOT . 'files' . DIRECTORY_SEPARATOR . '{size}' . DIRECTORY_SEPARATOR . 'test_upload' . DIRECTORY_SEPARATOR . 'photo' . DIRECTORY_SEPARATOR . '{geometry}' . DIRECTORY_SEPARATOR, $result);
 
-		$result = $this->protectedMethodCall($this->TestUpload->Behaviors->Upload, '_path', array(
-			$this->TestUpload, 'photo', array('isThumbnail' => false, 'path' => 'webroot{DS}files//{size}/{model}\\\\{field}{DS}{geometry}///')
-		));
+		$result = $this->protectedMethodCall($this->TestUpload->Behaviors->Upload, '_path', [
+			$this->TestUpload, 'photo', ['isThumbnail' => false, 'path' => 'webroot{DS}files//{size}/{model}\\\\{field}{DS}{geometry}///']
+		]);
 
 		$this->assertInternalType('string', $result);
 		$this->assertEquals(WWW_ROOT . 'files' . DIRECTORY_SEPARATOR . 'test_upload' . DIRECTORY_SEPARATOR . 'photo' . DIRECTORY_SEPARATOR, $result);
 	}
 
 	public function testPrepareFilesForDeletion() {
-		$this->TestUpload->actsAs['Upload.Upload'] = array(
-			'photo' => array(
-				'thumbnailSizes' => array(
+		$this->TestUpload->actsAs['Upload.Upload'] = [
+			'photo' => [
+				'thumbnailSizes' => [
 					'xvga' => '1024x768',
 					'vga' => '640x480',
 					'thumb' => '80x80'
-				),
-				'fields' => array(
+				],
+				'fields' => [
 					'dir' => 'dir'
-				)
-			)
-		);
+				]
+			]
+		];
 		$this->mockUpload();
 		$this->MockUpload->expects($this->once())->method('_getMimeType')->will($this->returnValue('image/png'));
 
-		$result = $this->protectedMethodCall($this->TestUpload->Behaviors->Upload, '_prepareFilesForDeletion', array(
+		$result = $this->protectedMethodCall($this->TestUpload->Behaviors->Upload, '_prepareFilesForDeletion', [
 			$this->TestUpload, 'photo',
-			array('TestUpload' => array('id' => 1, 'dir' => '1', 'photo' => 'Photo.png')),
+			['TestUpload' => ['id' => 1, 'dir' => '1', 'photo' => 'Photo.png']],
 			$this->TestUpload->Behaviors->Upload->settings['TestUpload']['photo']
-		));
+		]);
 
 		$this->assertInternalType('array', $result);
 		$this->assertEquals(1, count($result));
@@ -920,27 +920,27 @@ class UploadBehaviorTest extends CakeTestCase {
 	}
 
 	public function testPrepareFilesForDeletionWithoutDirDataFieldWithPrimaryKeyPathMethod() {
-		$this->TestUpload->actsAs['Upload.Upload'] = array(
-			'photo' => array(
+		$this->TestUpload->actsAs['Upload.Upload'] = [
+			'photo' => [
 				'pathMethod' => 'primaryKey',
-				'thumbnailSizes' => array(
+				'thumbnailSizes' => [
 					'xvga' => '1024x768',
 					'vga' => '640x480',
 					'thumb' => '80x80'
-				),
-				'fields' => array(
+				],
+				'fields' => [
 					'dir' => false
-				)
-			)
-		);
+				]
+			]
+		];
 		$this->mockUpload();
 		$this->MockUpload->expects($this->once())->method('_getMimeType')->will($this->returnValue('image/png'));
 
-		$result = $this->protectedMethodCall($this->TestUpload->Behaviors->Upload, '_prepareFilesForDeletion', array(
+		$result = $this->protectedMethodCall($this->TestUpload->Behaviors->Upload, '_prepareFilesForDeletion', [
 			$this->TestUpload, 'photo',
-			array('TestUpload' => array('id' => 1, 'photo' => 'Photo.png')),
+			['TestUpload' => ['id' => 1, 'photo' => 'Photo.png']],
 			$this->TestUpload->Behaviors->Upload->settings['TestUpload']['photo']
-		));
+		]);
 		$this->assertInternalType('array', $result);
 		$this->assertEquals(1, count($result));
 		$this->assertEquals(4, count($result['TestUpload']));
@@ -954,27 +954,27 @@ class UploadBehaviorTest extends CakeTestCase {
 	}
 
 	public function testPrepareFilesForDeletionWithoutDirDataFieldWithFlagPathMethod() {
-		$this->TestUpload->actsAs['Upload.Upload'] = array(
-			'photo' => array(
+		$this->TestUpload->actsAs['Upload.Upload'] = [
+			'photo' => [
 				'pathMethod' => 'flat',
-				'thumbnailSizes' => array(
+				'thumbnailSizes' => [
 					'xvga' => '1024x768',
 					'vga' => '640x480',
 					'thumb' => '80x80'
-				),
-				'fields' => array(
+				],
+				'fields' => [
 					'dir' => false
-				)
-			)
-		);
+				]
+			]
+		];
 		$this->mockUpload();
 		$this->MockUpload->expects($this->once())->method('_getMimeType')->will($this->returnValue('image/png'));
 
-		$result = $this->protectedMethodCall($this->TestUpload->Behaviors->Upload, '_prepareFilesForDeletion', array(
+		$result = $this->protectedMethodCall($this->TestUpload->Behaviors->Upload, '_prepareFilesForDeletion', [
 			$this->TestUpload, 'photo',
-			array('TestUpload' => array('id' => 1, 'photo' => 'Photo.png')),
+			['TestUpload' => ['id' => 1, 'photo' => 'Photo.png']],
 			$this->TestUpload->Behaviors->Upload->settings['TestUpload']['photo']
-		));
+		]);
 
 		$this->assertInternalType('array', $result);
 		$this->assertEquals(1, count($result));
@@ -989,27 +989,27 @@ class UploadBehaviorTest extends CakeTestCase {
 	}
 
 	public function testPrepareFilesForDeletionWithThumbnailType() {
-		$this->TestUpload->actsAs['Upload.Upload'] = array(
-			'photo' => array(
-				'thumbnailSizes' => array(
+		$this->TestUpload->actsAs['Upload.Upload'] = [
+			'photo' => [
+				'thumbnailSizes' => [
 					'xvga' => '1024x768',
 					'vga' => '640x480',
 					'thumb' => '80x80'
-				),
-				'fields' => array(
+				],
+				'fields' => [
 					'dir' => 'dir'
-				),
+				],
 				'thumbnailType' => 'jpg'
-			)
-		);
+			]
+		];
 		$this->mockUpload();
 		$this->MockUpload->expects($this->once())->method('_getMimeType')->will($this->returnValue('image/png'));
 
-		$result = $this->protectedMethodCall($this->TestUpload->Behaviors->Upload, '_prepareFilesForDeletion', array(
+		$result = $this->protectedMethodCall($this->TestUpload->Behaviors->Upload, '_prepareFilesForDeletion', [
 			$this->TestUpload, 'photo',
-			array('TestUpload' => array('id' => 1, 'dir' => '1', 'photo' => 'Photo.png')),
+			['TestUpload' => ['id' => 1, 'dir' => '1', 'photo' => 'Photo.png']],
 			$this->TestUpload->Behaviors->Upload->settings['TestUpload']['photo']
-		));
+		]);
 
 		$this->assertInternalType('array', $result);
 		$this->assertEquals(1, count($result));
@@ -1017,27 +1017,27 @@ class UploadBehaviorTest extends CakeTestCase {
 	}
 
 	public function testPrepareFilesForDeletionWithMediaFileAndFalseThumbnailType() {
-		$this->TestUpload->actsAs['Upload.Upload'] = array(
-			'photo' => array(
-				'thumbnailSizes' => array(
+		$this->TestUpload->actsAs['Upload.Upload'] = [
+			'photo' => [
+				'thumbnailSizes' => [
 					'xvga' => '1024x768',
 					'vga' => '640x480',
 					'thumb' => '80x80'
-				),
-				'fields' => array(
+				],
+				'fields' => [
 					'dir' => 'dir'
-				),
+				],
 				'thumbnailType' => false
-			)
-		);
+			]
+		];
 		$this->mockUpload();
 		$this->MockUpload->expects($this->once())->method('_getMimeType')->will($this->returnValue('application/pdf'));
 
-		$result = $this->protectedMethodCall($this->TestUpload->Behaviors->Upload, '_prepareFilesForDeletion', array(
+		$result = $this->protectedMethodCall($this->TestUpload->Behaviors->Upload, '_prepareFilesForDeletion', [
 			$this->TestUpload, 'photo',
-			array('TestUpload' => array('id' => 1, 'dir' => '1', 'photo' => 'Photo.pdf')),
+			['TestUpload' => ['id' => 1, 'dir' => '1', 'photo' => 'Photo.pdf']],
 			$this->TestUpload->Behaviors->Upload->settings['TestUpload']['photo']
-		));
+		]);
 
 		$this->assertInternalType('array', $result);
 		$this->assertEquals(1, count($result));
@@ -1045,26 +1045,26 @@ class UploadBehaviorTest extends CakeTestCase {
 	}
 
 	public function testPrepareFilesForDeletionWithMediaFile() {
-		$this->TestUpload->actsAs['Upload.Upload'] = array(
-			'photo' => array(
-				'thumbnailSizes' => array(
+		$this->TestUpload->actsAs['Upload.Upload'] = [
+			'photo' => [
+				'thumbnailSizes' => [
 					'xvga' => '1024x768',
 					'vga' => '640x480',
 					'thumb' => '80x80'
-				),
-				'fields' => array(
+				],
+				'fields' => [
 					'dir' => 'dir'
-				)
-			)
-		);
+				]
+			]
+		];
 		$this->mockUpload();
 		$this->MockUpload->expects($this->once())->method('_getMimeType')->will($this->returnValue('application/pdf'));
 
-		$result = $this->protectedMethodCall($this->TestUpload->Behaviors->Upload, '_prepareFilesForDeletion', array(
+		$result = $this->protectedMethodCall($this->TestUpload->Behaviors->Upload, '_prepareFilesForDeletion', [
 			$this->TestUpload, 'photo',
-			array('TestUpload' => array('id' => 1, 'dir' => '1', 'photo' => 'Photo.pdf')),
+			['TestUpload' => ['id' => 1, 'dir' => '1', 'photo' => 'Photo.pdf']],
 			$this->TestUpload->Behaviors->Upload->settings['TestUpload']['photo']
-		));
+		]);
 
 		$this->assertInternalType('array', $result);
 		$this->assertEquals(1, count($result));

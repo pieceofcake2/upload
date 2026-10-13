@@ -21,7 +21,7 @@ class ThumbnailShell extends AppShell {
  */
 	public function getOptionParser() {
 		$parser = parent::getOptionParser();
-		$parser->addSubcommand('generate', array('help' => 'Find models and regenerate the thumbnails.'));
+		$parser->addSubcommand('generate', ['help' => 'Find models and regenerate the thumbnails.']);
 		return $parser;
 	}
 
@@ -40,7 +40,7 @@ class ThumbnailShell extends AppShell {
 			exit;
 		}
 
-		if (get_class($this->{$modelName}) === 'AppModel') {
+		if ($this->{$modelName}::class === 'AppModel') {
 			$this->out(__("<error>Model '$modelName' not found.</error>"));
 			exit;
 		}
@@ -56,18 +56,18 @@ class ThumbnailShell extends AppShell {
 		foreach ($behaviorConfig as $field => $config) {
 			$mergedConfig = array_merge($uploadBehavior->defaults, $config);
 
-			$options = array(
+			$options = [
 				'isThumbnail' => true,
 				'path' => $mergedConfig['path'],
 				'rootDir' => $mergedConfig['rootDir'],
-			);
+			];
 
-			$files = $this->{$modelName}->find('all', array(
+			$files = $this->{$modelName}->find('all', [
 				'fields' => [$this->{$modelName}->primaryKey, $field, $mergedConfig['fields']['dir']],
-				'conditions' => array(
+				'conditions' => [
 					$modelName . '.' . $field . " IS NOT NULL"
-				)
-			));
+				]
+			]);
 
 			foreach ($files as $file) {
 				$this->{$modelName}->Behaviors->load('ShellUpload', $behaviorConfig);
@@ -79,19 +79,19 @@ class ThumbnailShell extends AppShell {
 				}
 
 				// $field needs to be an array like uploading an image
-				$fieldData = array(
+				$fieldData = [
 					'name' => basename($sourceFilePath),
 					'type' => mime_content_type($sourceFilePath),
 					'size' => filesize($sourceFilePath),
 					'tmp_name' => $sourceFilePath,
 					'error' => UPLOAD_ERR_OK
-				);
+				];
 
-				$data = array(
+				$data = [
 					$this->{$modelName}->primaryKey => $file[$modelName][$this->{$modelName}->primaryKey],
 					$field => $fieldData,
 					$config['fields']['dir'] => $file[$modelName][$this->{$modelName}->primaryKey],
-				);
+				];
 
 				if ($this->{$modelName}->hasField('modified')) {
 					$data['modified'] = false;
