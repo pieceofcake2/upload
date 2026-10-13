@@ -447,7 +447,6 @@ class UploadBehaviorTest extends CakeTestCase
         $this->assertIsArray($result);
         $id = $this->TestUpload->id;
 
-        $existingRecord = $this->TestUpload->findById($id);
         $this->TestUpload->uploadSettings('photo', 'keepFilesOnDelete', true);
         $this->MockUpload->expects($this->never())->method('unlink');
 
@@ -488,7 +487,6 @@ class UploadBehaviorTest extends CakeTestCase
             ],
         ];
 
-        $existingRecord = $this->TestUpload->findById($data['id']);
         $result = $this->TestUpload->save($data);
         $this->assertIsArray($result);
     }
@@ -505,7 +503,6 @@ class UploadBehaviorTest extends CakeTestCase
             ],
         ];
 
-        $existingRecord = $this->TestUpload->findById($data['id']);
         $result = $this->TestUpload->save($data);
         $this->assertIsArray($result);
     }
@@ -520,7 +517,7 @@ class UploadBehaviorTest extends CakeTestCase
         $this->expectException(UploadException::class);
         $this->mockUpload(['handleUploadedFile']);
         $this->MockUpload->expects($this->once())->method('handleUploadedFile')->willReturn(false);
-        $result = $this->TestUpload->save($this->data['test_ok']);
+        $this->TestUpload->save($this->data['test_ok']);
     }
 
     /**
@@ -1026,7 +1023,6 @@ class UploadBehaviorTest extends CakeTestCase
         $this->assertEquals(4, count($result['TestUpload']));
 
         $basePath = $this->TestUpload->Behaviors->Upload->settings['TestUpload']['photo']['path'];
-        $primaryKey = 1;
         $this->assertEquals($result['TestUpload'][0], sprintf('%sPhoto.png', $basePath));
         $this->assertEquals($result['TestUpload'][1], sprintf('%sxvga_Photo.png', $basePath));
         $this->assertEquals($result['TestUpload'][2], sprintf('%svga_Photo.png', $basePath));
