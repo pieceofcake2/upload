@@ -9,6 +9,6 @@ return RectorConfig::configure()
         __DIR__ . '/Console',
         __DIR__ . '/Lib',
         __DIR__ . '/Model',
-        __DIR__ . '/Test',
+        __DIR__ . '/tests',
     ])
     ->withPhpSets(php80: true);
