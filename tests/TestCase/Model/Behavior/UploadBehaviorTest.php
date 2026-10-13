@@ -1,6 +1,8 @@
 <?php
 App::uses('UploadBehavior', 'Upload.Model/Behavior');
 App::uses('Folder', 'Utility');
+App::uses('HttpSocket', 'Network/Http');
+App::uses('HttpSocketResponse', 'Network/Http');
 
 class TestUpload extends CakeTestModel {
 
@@ -148,7 +150,9 @@ class UploadBehaviorTest extends CakeTestCase {
 	public function protectedMethodCall($obj, $name, array $args) {
 		$class = new \ReflectionClass($obj);
 		$method = $class->getMethod($name);
-		$method->setAccessible(true);
+		if (PHP_VERSION_ID < 80100) {
+			$method->setAccessible(true);
+		}
 		return $method->invokeArgs($obj, $args);
 	}
 
@@ -159,8 +163,10 @@ class UploadBehaviorTest extends CakeTestCase {
  */
 	public function tearDown(): void {
 		$folder = new Folder(TMP);
-		$folder->delete(ROOT . DS . APP_DIR . DS . 'webroot' . DS . 'files' . DS . 'test_upload');
-		$folder->delete(ROOT . DS . APP_DIR . DS . 'tmp' . DS . 'tests' . DS . 'path');
+		$folder->delete(WWW_ROOT . 'files' . DS . 'test_upload');
+		$folder->delete(WWW_ROOT . 'files' . DS . 'test_upload_two');
+		$folder->delete(TMP . 'tests' . DS . 'path');
+		$folder->delete(TMP . 'tests' . DS . 'upload');
 		ClassRegistry::flush();
 		unset($this->TestUpload);
 		unset($this->TestUploadTwo);
@@ -266,7 +272,7 @@ class UploadBehaviorTest extends CakeTestCase {
 	public function testSaveSuccessPngDefaultPathAndPathMethod(): void {
 		$this->mockUpload();
 		$nextId = (1 + $this->TestUploadTwo->field('id', [], ['TestUploadTwo.id' => 'DESC']));
-		$destinationDir = APP . 'webroot' . DS . 'files' . DS . 'test_upload_two' . DS . 'photo' . DS . $nextId . DS;
+		$destinationDir = WWW_ROOT . 'files' . DS . 'test_upload_two' . DS . 'photo' . DS . $nextId . DS;
 
 		$Upload = [
 			'TestUploadTwo' => [
@@ -1075,6 +1081,198 @@ class UploadBehaviorTest extends CakeTestCase {
 	private function __testOkAndRemoveCasesValidate() {
 		$this->__testOkCaseValidates();
 		$this->__testRemoveCaseValidates();
+	}
+
+/**
+ * Creates an image file with GD
+ *
+ * @param string $path Path of the image to create
+ * @param int $width Width of the image
+ * @param int $height Height of the image
+ * @return string
+ */
+	protected function _createImage($path, $width, $height) {
+		if (!is_dir(dirname($path))) {
+			mkdir(dirname($path), 0777, true);
+		}
+
+		$image = imagecreatetruecolor($width, $height);
+		imagefill($image, 0, 0, imagecolorallocate($image, 255, 0, 0));
+		if (substr($path, -4) === '.jpg') {
+			imagejpeg($image, $path);
+		} else {
+			imagepng($image, $path);
+		}
+
+		return $path;
+	}
+
+	public function testDefaultRootDirIsParentOfWebroot(): void {
+		$behavior = new UploadBehavior();
+		$this->assertSame(dirname(WWW_ROOT) . DS, $behavior->defaults['rootDir']);
+		$this->assertSame(WWW_ROOT . 'files' . DS . 'test_upload' . DS . 'photo' . DS, $this->TestUpload->Behaviors->Upload->settings['TestUpload']['photo']['path']);
+	}
+
+/**
+ * Tests the GD resizer with geometries producing fractional dimensions
+ *
+ * @dataProvider providerTestResizePhp
+ * @param string $file Source file name
+ * @param string $geometry Thumbnail geometry
+ * @param array $expected Expected width and height
+ * @return void
+ */
+	public function testResizePhp($file, $geometry, $expected): void {
+		$path = TMP . 'tests' . DS . 'upload' . DS;
+		$this->_createImage($path . $file, 100, 33);
+		$thumbnailPath = $path . 'thumb' . DS;
+		mkdir($thumbnailPath, 0777, true);
+
+		$this->TestUpload->uploadSettings('photo', 'thumbnailMethod', '_resizePhp');
+		$this->TestUpload->data = ['TestUpload' => ['photo' => $file]];
+		$this->TestUpload->id = 1;
+
+		// Fractional dimensions must not trigger "Implicit conversion from float" deprecations (PHP 8.1+)
+		$deprecations = [];
+		$level = error_reporting(E_ALL);
+		set_error_handler(function ($errno, $errstr) use (&$deprecations) {
+			$deprecations[] = $errstr;
+
+			return true;
+		}, E_DEPRECATED | E_USER_DEPRECATED);
+		try {
+			$result = $this->protectedMethodCall($this->TestUpload->Behaviors->Upload, '_resizePhp', [
+				$this->TestUpload, 'photo', $path, 'thumb', $geometry, $thumbnailPath,
+			]);
+		} finally {
+			restore_error_handler();
+			error_reporting($level);
+		}
+		$this->assertTrue($result);
+		$this->assertSame([], $deprecations);
+
+		$thumbnail = $thumbnailPath . 'thumb_' . $file;
+		$this->assertFileExists($thumbnail);
+		[$width, $height] = getimagesize($thumbnail);
+		$this->assertSame($expected, [$width, $height]);
+	}
+
+	public function providerTestResizePhp(): array {
+		return [
+			['source.png', '30w', [30, 9]],
+			['source.png', '20h', [60, 20]],
+			['source.png', '40x40', [40, 40]],
+			['source.png', '[40x40]', [40, 40]],
+			['source.png', '30l', [30, 9]],
+			['source.png', '200mw', [100, 33]],
+			['source.png', '20mh', [60, 20]],
+			['source.png', '50ml', [50, 16]],
+			['source.jpg', '30w', [30, 9]],
+		];
+	}
+
+	public function testCreateThumbnailsWithInvalidThumbnailMethod(): void {
+		$this->TestUpload->uploadSettings('photo', [
+			'thumbnailMethod' => '_resizeNothing',
+			'thumbnailSizes' => ['thumb' => '10w'],
+		]);
+		$this->TestUpload->Behaviors->Upload->runtime['TestUpload']['photo'] = ['type' => 'image/png'];
+		$path = TMP . 'tests' . DS . 'upload' . DS;
+
+		$this->expectException(Exception::class);
+		$this->expectExceptionMessage('Invalid thumbnailMethod _resizeNothing');
+		$this->protectedMethodCall($this->TestUpload->Behaviors->Upload, '_createThumbnails', [
+			$this->TestUpload, 'photo', $path, $path,
+		]);
+	}
+
+	public function testSaveAndDeleteWithFiles(): void {
+		$path = TMP . 'tests' . DS . 'upload' . DS;
+		$this->TestUpload->Behaviors->unload('Upload');
+		$this->TestUpload->Behaviors->load('Upload.Upload', [
+			'photo' => [
+				'path' => $path . '{model}' . DS . '{field}' . DS,
+				'thumbnailMethod' => 'php',
+				'thumbnailSizes' => ['thumb' => '20w'],
+			],
+		]);
+		$source = $this->_createImage($path . 'source' . DS . 'image.png', 100, 50);
+
+		$result = $this->TestUpload->save([
+			'photo' => [
+				'name' => 'image.png',
+				'tmp_name' => $source,
+				'type' => 'image/png',
+				'size' => filesize($source),
+				'error' => UPLOAD_ERR_OK,
+			],
+		]);
+		$this->assertIsArray($result);
+
+		$id = $this->TestUpload->id;
+		$dir = $path . 'test_upload' . DS . 'photo' . DS . $id . DS;
+		$this->assertFileExists($dir . 'image.png');
+		$this->assertFileExists($dir . 'thumb_image.png');
+		$this->assertSame([20, 10], array_slice(getimagesize($dir . 'thumb_image.png'), 0, 2));
+		$this->assertFileDoesNotExist($source);
+
+		$record = $this->TestUpload->findById($id);
+		$this->assertSame('image.png', $record['TestUpload']['photo']);
+		$this->assertEquals($id, $record['TestUpload']['dir']);
+
+		$this->assertTrue($this->TestUpload->delete($id));
+		$this->assertFileDoesNotExist($dir . 'image.png');
+		$this->assertFileDoesNotExist($dir . 'thumb_image.png');
+	}
+
+	public function testGrabRemoteFile(): void {
+		$this->mockUpload(['_getHttpSocket']);
+
+		$response = new HttpSocketResponse();
+		$response->code = 200;
+		$response->headers = ['Content-Type' => 'image/png', 'content-length' => '4'];
+		$response->body = 'data';
+
+		$socket = $this->getMockBuilder(HttpSocket::class)
+			->onlyMethods(['get'])
+			->getMock();
+		$socket->expects($this->once())
+			->method('get')
+			->with('http://example.com/images/remote%20file.png', [], ['redirect' => true])
+			->willReturn($response);
+		$socket->request = ['uri' => ['path' => '/images/remote%20file.png']];
+		$this->MockUpload->expects($this->once())->method('_getHttpSocket')->willReturn($socket);
+
+		$this->TestUpload->set(['photo' => 'http://example.com/images/remote%20file.png']);
+		$this->assertTrue($this->TestUpload->validates());
+
+		$expected = [
+			'name' => 'remote file.png',
+			'type' => 'image/png',
+			'tmp_name' => sys_get_temp_dir() . DS . 'remote file.png',
+			'error' => 0,
+			'size' => 4,
+		];
+		$this->assertSame($expected, $this->TestUpload->data['TestUpload']['photo']);
+		$this->assertStringEqualsFile($expected['tmp_name'], 'data');
+		unlink($expected['tmp_name']);
+	}
+
+	public function testGrabRemoteFileNotFound(): void {
+		$this->mockUpload(['_getHttpSocket']);
+
+		$response = new HttpSocketResponse();
+		$response->code = 404;
+
+		$socket = $this->getMockBuilder(HttpSocket::class)
+			->onlyMethods(['get'])
+			->getMock();
+		$socket->method('get')->willReturn($response);
+		$this->MockUpload->method('_getHttpSocket')->willReturn($socket);
+
+		$this->TestUpload->set(['photo' => 'http://example.com/missing.png']);
+		$this->assertFalse($this->TestUpload->validates());
+		$this->assertSame(['File was not downloaded.'], $this->TestUpload->validationErrors['photo']);
 	}
 
 	private function __testValidates($data) {

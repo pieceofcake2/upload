@@ -93,7 +93,14 @@ class UploadBehavior extends ModelBehavior {
  * Set default root directory.
  */
 	public function __construct() {
-		$this->defaults['rootDir'] ??= ROOT . DS . APP_DIR . DS;
+		parent::__construct();
+
+		if ($this->defaults['rootDir'] === null) {
+			// The parent of the webroot directory, so that the default
+			// `{ROOT}webroot` path points to WWW_ROOT in both the classic
+			// `app/` layout and the modern layout (`src/` + `webroot/`).
+			$this->defaults['rootDir'] = defined('WWW_ROOT') ? dirname(WWW_ROOT) . DS : ROOT . DS . APP_DIR . DS;
+		}
 	}
 
 /**
@@ -1186,16 +1193,16 @@ class UploadBehavior extends ModelBehavior {
 		if (preg_match('/^\\[[\\d]+x[\\d]+\\]$/', $geometry)) {
 			// resize with banding
 			[$destW, $destH] = explode('x', substr($geometry, 1, strlen($geometry) - 2));
-			$image->thumbnailImage($destW, $destH, true);
+			$image->thumbnailImage((int)$destW, (int)$destH, true);
 			$imageGeometry = $image->getImageGeometry();
 			$xDimen = ($imageGeometry['width'] - $destW) / 2;
 			$yDimen = ($imageGeometry['height'] - $destH) / 2;
 			$image->setGravity(Imagick::GRAVITY_CENTER);
-			$image->extentImage($destW, $destH, $xDimen, $yDimen);
+			$image->extentImage((int)$destW, (int)$destH, (int)$xDimen, (int)$yDimen);
 		} elseif (preg_match('/^[\\d]+x[\\d]+$/', $geometry)) {
 			// cropped resize (best fit)
 			[$destW, $destH] = explode('x', $geometry);
-			$image->cropThumbnailImage($destW, $destH);
+			$image->cropThumbnailImage((int)$destW, (int)$destH);
 		} elseif (preg_match('/^[\\d]+w$/', $geometry)) {
 			// calculate heigh according to aspect ratio
 			$image->thumbnailImage((int)$geometry, 0);
@@ -1446,11 +1453,13 @@ class UploadBehavior extends ModelBehavior {
 				$resizeH = $destH;
 			}
 
+			$destW = max(1, (int)$destW);
+			$destH = max(1, (int)$destH);
 			$img = imagecreatetruecolor($destW, $destH);
 			imagealphablending($img, false);
 			imagesavealpha($img, true);
 			imagefill($img, 0, 0, imagecolorallocate($img, 255, 255, 255));
-			imagecopyresampled($img, $src, ($destW - $resizeW) / 2, ($destH - $resizeH) / 2, 0, 0, $resizeW, $resizeH, $srcW, $srcH);
+			imagecopyresampled($img, $src, (int)(($destW - $resizeW) / 2), (int)(($destH - $resizeH) / 2), 0, 0, (int)$resizeW, (int)$resizeH, $srcW, $srcH);
 
 			if ($supportsQuality) {
 				$outputHandler($img, $destFile, $adjustedQuality);
@@ -1736,37 +1745,47 @@ class UploadBehavior extends ModelBehavior {
  * @return bool
  */
 	protected function _grab(Model $model, $field, $uri) {
-		$socket = new HttpSocket([
-			'ssl_verify_host' => false
-		]);
-		$file = $socket->get($uri, [], ['redirect' => true]);
-		$headers = $socket->response['header'];
-		$fileName = urldecode(basename($socket->request['uri']['path']));
-		$tmpFile = sys_get_temp_dir() . '/' . $fileName;
-
-		if ($socket->response['status']['code'] != 200) {
+		$socket = $this->_getHttpSocket();
+		$response = $socket->get($uri, [], ['redirect' => true]);
+		if (!$response || (int)$response->code !== 200) {
 			return false;
 		}
 
+		$path = (string)$socket->request['uri']['path'];
+		$fileName = urldecode(basename($path));
+		$tmpFile = sys_get_temp_dir() . DS . $fileName;
+
 		if (isset($model->data[$model->alias]['file_name_override'])) {
-			$fileName = $model->data[$model->alias]['file_name_override'] . '.' . pathinfo($socket->request['uri']['path'], PATHINFO_EXTENSION);
+			$fileName = $model->data[$model->alias]['file_name_override'] . '.' . pathinfo($path, PATHINFO_EXTENSION);
 		}
 
+		$size = $response->getHeader('Content-Length');
 		$model->data[$model->alias][$field] = [
 			'name' => $fileName,
-			'type' => $headers['Content-Type'],
+			'type' => $response->getHeader('Content-Type'),
 			'tmp_name' => $tmpFile,
 			'error' => 1,
-			'size' => (isset($headers['content-length']) ? $headers['Content-Length'] : 0),
+			'size' => $size !== null ? (int)$size : strlen($response->body),
 		];
 
-		$file = file_put_contents($tmpFile, $socket->response['body']);
+		$file = file_put_contents($tmpFile, $response->body);
 		if (!$file) {
 			return false;
 		}
 
 		$model->data[$model->alias][$field]['error'] = 0;
 		return true;
+	}
+
+/**
+ * Returns the HttpSocket instance used to download remote files
+ *
+ * @return HttpSocket
+ */
+	protected function _getHttpSocket() {
+		return new HttpSocket([
+			'ssl_verify_host' => false
+		]);
 	}
 
 /**
@@ -1928,7 +1947,7 @@ class UploadBehavior extends ModelBehavior {
 				CakeLog::error(sprintf('Model %s, Field %s: Invalid thumbnailMethod %s', $model->alias, $field, $method));
 				$db = $model->getDataSource();
 				$db->rollback();
-				throw new Exception("Invalid thumbnailMethod %s", $method);
+				throw new Exception(sprintf('Invalid thumbnailMethod %s', $method));
 			}
 
 			if (!$valid) {
