@@ -28,7 +28,7 @@ class ThumbnailShell extends AppShell
     /**
      * Regenerate thumbnails for images linked in the database
      *
-     * @return void
+     * @return int|null Exit code on error, null on success
      */
     public function generate()
     {
@@ -114,5 +114,7 @@ class ThumbnailShell extends AppShell
 
             $Behavior->uploadSettings($Model, $field, 'deleteOnUpdate', $config['deleteOnUpdate']);
         }
+
+        return null;
     }
 }

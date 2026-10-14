@@ -107,7 +107,7 @@ class UploadBehavior extends ModelBehavior
     /**
      * Initiate Upload behavior
      *
-     * @param object $model instance of model
+     * @param Model $model instance of model
      * @param array $config array of configuration settings.
      * @return void
      */
@@ -128,8 +128,8 @@ class UploadBehavior extends ModelBehavior
      * Setup a particular upload field
      *
      * @param Model $model Model instance
-     * @param string $field Name of field being modified
-     * @param array $options array of configuration settings for a field
+     * @param string|int $field Name of field being modified, or a numeric key when the field name is given as the value
+     * @param array|string $options array of configuration settings for a field, or the field name
      * @return void
      */
     protected function _setupField(Model $model, $field, $options)
@@ -346,8 +346,8 @@ class UploadBehavior extends ModelBehavior
 
             $this->_createThumbnails($model, $field, $path, $thumbnailPath);
             if ($model->hasField($options['fields']['dir'])) {
-                if (!($created && $options['pathMethod'] == '_getPathFlat') && $options['saveDir']) {
-                    $db = $model->getDataSource();
+                $db = $model->getDataSource();
+                if (!($created && $options['pathMethod'] == '_getPathFlat') && $options['saveDir'] && $db instanceof DboSource) {
                     $temp[$model->alias][$options['fields']['dir']] = $db->value($tempPath, 'string');
                 }
             }
@@ -483,10 +483,9 @@ class UploadBehavior extends ModelBehavior
      */
     public function afterDelete(Model $model)
     {
-        $result = [];
         if (!empty($this->__filesToRemove[$model->alias])) {
             foreach ($this->__filesToRemove[$model->alias] as $i => $file) {
-                $result[] = $this->unlink($file);
+                $this->unlink($file);
                 unset($this->__filesToRemove[$model->alias][$i]);
             }
         }
@@ -495,11 +494,9 @@ class UploadBehavior extends ModelBehavior
             if ($options['deleteFolderOnDelete'] == true) {
                 $this->deleteFolder($model, $options['path']);
 
-                return true;
+                return;
             }
         }
-
-        return $result;
     }
 
     /**
@@ -684,7 +681,7 @@ class UploadBehavior extends ModelBehavior
      *
      * @param Model $model Model instance
      * @param mixed $check Value to check
-     * @param array $mimetypes file mimetypes to allow
+     * @param array|string $mimetypes file mimetypes to allow
      * @param bool $requireUpload Whether or not to require a file upload
      * @return bool Success
      */
@@ -857,7 +854,7 @@ class UploadBehavior extends ModelBehavior
      *
      * @param Model $model Model instance
      * @param mixed $check Value to check
-     * @param array $extensions file extenstions to allow
+     * @param array|string $extensions file extenstions to allow
      * @param bool $requireUpload Whether or not to require a file upload
      * @return bool Success
      */
@@ -1074,8 +1071,8 @@ class UploadBehavior extends ModelBehavior
     /**
      * Returns the thumbnail name format
      *
-     * @param string $configuredName Configured name
-     * @param string $usePrefixStyle Whether to use prefix style or not
+     * @param string|null $configuredName Configured name
+     * @param bool $usePrefixStyle Whether to use prefix style or not
      * @return string
      */
     protected function _getThumbnailName($configuredName, $usePrefixStyle)
@@ -1097,7 +1094,7 @@ class UploadBehavior extends ModelBehavior
      * @param Model $model Model instance
      * @param string $field Name of field being modified
      * @param bool $removing Whether the record should be removed
-     * @return string
+     * @return bool
      */
     protected function _shouldUpdate($model, $field, $removing)
     {
@@ -1167,6 +1164,7 @@ class UploadBehavior extends ModelBehavior
             return true;
         }
 
+        $result = [];
         foreach ($this->__filesToRemove[$model->alias] as $i => $file) {
             $result[] = $this->unlink($file);
             unset($this->__filesToRemove[$model->alias][$i]);
@@ -1251,13 +1249,13 @@ class UploadBehavior extends ModelBehavior
 
         if (preg_match('/^\\[[\\d]+x[\\d]+\\]$/', $geometry)) {
             // resize with banding
-            [$destW, $destH] = explode('x', substr($geometry, 1, strlen($geometry) - 2));
-            $image->thumbnailImage((int)$destW, (int)$destH, true);
+            [$destW, $destH] = array_map('intval', explode('x', substr($geometry, 1, strlen($geometry) - 2)));
+            $image->thumbnailImage($destW, $destH, true);
             $imageGeometry = $image->getImageGeometry();
             $xDimen = ($imageGeometry['width'] - $destW) / 2;
             $yDimen = ($imageGeometry['height'] - $destH) / 2;
             $image->setGravity(Imagick::GRAVITY_CENTER);
-            $image->extentImage((int)$destW, (int)$destH, (int)$xDimen, (int)$yDimen);
+            $image->extentImage($destW, $destH, (int)$xDimen, (int)$yDimen);
         } elseif (preg_match('/^[\\d]+x[\\d]+$/', $geometry)) {
             // cropped resize (best fit)
             [$destW, $destH] = explode('x', $geometry);
@@ -1313,7 +1311,7 @@ class UploadBehavior extends ModelBehavior
                         $ext = end($pieces);
                     }
 
-                    if (!$ext || !strlen($ext)) {
+                    if (!$ext) {
                         break;
                     }
 
@@ -1334,7 +1332,7 @@ class UploadBehavior extends ModelBehavior
                     break;
                 }
             } catch (Exception $e) {
-                $this->log($e->getMessage(), 'upload');
+                CakeLog::write('upload', $e->getMessage());
                 $thumbnailType = $imageFormat = 'png';
             }
         }
@@ -1423,6 +1421,9 @@ class UploadBehavior extends ModelBehavior
             $srcH = imagesy($src);
 
             // determine destination dimensions and resize mode from provided geometry
+            $destW = null;
+            $destH = null;
+            $resizeMode = false;
             if (preg_match('/^\\[[\\d]+x[\\d]+\\]$/', $geometry)) {
                 // resize with banding
                 [$destW, $destH] = explode('x', substr($geometry, 1, strlen($geometry) - 2));
@@ -1479,6 +1480,10 @@ class UploadBehavior extends ModelBehavior
                     }
                 }
                 $resizeMode = false;
+            } else {
+                // unknown geometry: keep the original dimensions, like the imagick resizer does
+                $destW = $srcW;
+                $destH = $srcH;
             }
 
             $destW ??= $destH / $srcH * $srcW;
@@ -1538,8 +1543,8 @@ class UploadBehavior extends ModelBehavior
      * Creates an image resource for a given file
      *
      * @param string $filename full path to file
-     * @param string $pathInfo Array of path information
-     * @return bool
+     * @param array $pathInfo Array of path information
+     * @return GdImage|false
      */
     protected function _createImageResource($filename, $pathInfo)
     {
@@ -1566,7 +1571,7 @@ class UploadBehavior extends ModelBehavior
      * See http://www.php.net/manual/en/function.imagecreatefromjpeg.php#112902
      *
      * @param string $filename full path to file
-     * @return resource rotated image
+     * @return GdImage|false rotated image
      */
     protected function _imagecreatefromjpegexif($filename)
     {
@@ -1659,9 +1664,9 @@ class UploadBehavior extends ModelBehavior
     /**
      * Flip an image object. Code from http://www.roscripts.com/snippets/show/55
      *
-     * @param resource $img An image resource, such as one returned by imagecreatefromjpeg()
+     * @param GdImage $img An image, such as one returned by imagecreatefromjpeg()
      * @param string $type 'horz' or 'vert'
-     * @return resource The flipped image
+     * @return GdImage|false The flipped image
      */
     protected function _flipImage($img, $type)
     {
@@ -1917,7 +1922,7 @@ class UploadBehavior extends ModelBehavior
             '{primaryKey}' => $model->id,
             '{model}' => Inflector::underscore($model->alias),
             '{field}' => $field,
-            '{time}' => time(),
+            '{time}' => (string)time(),
             '{microtime}' => microtime(),
             '{DS}' => DIRECTORY_SEPARATOR,
         ];
@@ -2089,9 +2094,9 @@ class UploadBehavior extends ModelBehavior
         }
 
         if (function_exists('exif_imagetype') && function_exists('image_type_to_mime_type')) {
-            $mimetype = image_type_to_mime_type(exif_imagetype($filePath));
-            if ($mimetype !== false) {
-                return $mimetype;
+            $imageType = exif_imagetype($filePath);
+            if ($imageType !== false) {
+                return image_type_to_mime_type($imageType);
             }
         }
 
@@ -2109,7 +2114,7 @@ class UploadBehavior extends ModelBehavior
      * @param string $field Name of field being modified
      * @param array $data array of data
      * @param array $options array of configuration settings for a field
-     * @return bool
+     * @return array
      */
     protected function _prepareFilesForDeletion(Model $model, $field, $data, $options = [])
     {
@@ -2121,6 +2126,7 @@ class UploadBehavior extends ModelBehavior
             return $this->__filesToRemove;
         }
 
+        $dir = null;
         if (!empty($options['fields']['dir']) && isset($data[$model->alias][$options['fields']['dir']])) {
             $dir = $data[$model->alias][$options['fields']['dir']];
         } else {
@@ -2187,7 +2193,7 @@ class UploadBehavior extends ModelBehavior
         foreach ($options['thumbnailSizes'] as $size => $geometry) {
             $fileName = str_replace(
                 ['{size}', '{geometry}', '{filename}', '{primaryKey}', '{time}', '{microtime}'],
-                [$size, $geometry, $pathInfo['filename'], $model->id, time(), microtime()],
+                [$size, $geometry, $pathInfo['filename'], $model->id, (string)time(), microtime()],
                 $options['thumbnailName'],
             );
 

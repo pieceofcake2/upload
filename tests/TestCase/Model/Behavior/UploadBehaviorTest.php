@@ -1058,6 +1058,43 @@ class UploadBehaviorTest extends CakeTestCase
         $this->assertEquals(4, count($result['TestUpload']));
     }
 
+    /**
+     * The directory cannot be determined for the random path methods when the
+     * dir field is not part of the data; the file is then looked up in the base path.
+     *
+     * @return void
+     */
+    public function testPrepareFilesForDeletionWithUnsupportedPathMethodAndNoDir(): void
+    {
+        $this->TestUpload->actsAs['Upload.Upload'] = [
+            'photo' => [
+                'pathMethod' => 'random',
+                'thumbnailSizes' => [
+                    'thumb' => '80x80',
+                ],
+                'thumbnailMethod' => 'php',
+                'fields' => [
+                    'dir' => 'dir',
+                ],
+            ],
+        ];
+        $this->mockUpload();
+        $this->MockUpload->expects($this->once())->method('_getMimeType')->willReturn('image/png');
+
+        $result = $this->protectedMethodCall($this->TestUpload->Behaviors->Upload, '_prepareFilesForDeletion', [
+            $this->TestUpload, 'photo',
+            ['TestUpload' => ['id' => 1, 'photo' => 'Photo.png']],
+            $this->TestUpload->Behaviors->Upload->settings['TestUpload']['photo'],
+        ]);
+
+        $basePath = $this->TestUpload->Behaviors->Upload->settings['TestUpload']['photo']['path'];
+        $thumbnailPath = $this->TestUpload->Behaviors->Upload->settings['TestUpload']['photo']['thumbnailPath'];
+        $this->assertSame([
+            $basePath . 'Photo.png',
+            $thumbnailPath . 'thumb_Photo.png',
+        ], $result['TestUpload']);
+    }
+
     public function testPrepareFilesForDeletionWithMediaFileAndFalseThumbnailType(): void
     {
         $this->TestUpload->actsAs['Upload.Upload'] = [
@@ -1210,6 +1247,8 @@ class UploadBehaviorTest extends CakeTestCase
             ['source.png', '20mh', [60, 20]],
             ['source.png', '50ml', [50, 16]],
             ['source.jpg', '30w', [30, 9]],
+            // Unknown geometries keep the original dimensions, like the imagick resizer
+            ['source.png', 'foo', [100, 33]],
         ];
     }
 
@@ -1267,6 +1306,62 @@ class UploadBehaviorTest extends CakeTestCase
         $this->assertTrue($this->TestUpload->delete($id));
         $this->assertFileDoesNotExist($dir . 'image.png');
         $this->assertFileDoesNotExist($dir . 'thumb_image.png');
+    }
+
+    public function testDeleteFolderOnDelete(): void
+    {
+        $path = TMP . 'tests' . DS . 'upload' . DS;
+        $this->TestUpload->Behaviors->unload('Upload');
+        $this->TestUpload->Behaviors->load('Upload.Upload', [
+            'photo' => [
+                'path' => $path . '{model}' . DS . '{field}' . DS,
+                'thumbnailMethod' => 'php',
+                'thumbnailSizes' => ['thumb' => '20w'],
+                'deleteFolderOnDelete' => true,
+            ],
+        ]);
+        $source = $this->_createImage($path . 'source' . DS . 'image.png', 100, 50);
+
+        $result = $this->TestUpload->save([
+            'photo' => [
+                'name' => 'image.png',
+                'tmp_name' => $source,
+                'type' => 'image/png',
+                'size' => filesize($source),
+                'error' => UPLOAD_ERR_OK,
+            ],
+        ]);
+        $this->assertIsArray($result);
+
+        $id = $this->TestUpload->id;
+        $dir = $path . 'test_upload' . DS . 'photo' . DS . $id . DS;
+        $this->assertFileExists($dir . 'image.png');
+        $this->assertFileExists($dir . 'thumb_image.png');
+
+        $this->assertTrue($this->TestUpload->delete($id));
+        $this->assertDirectoryDoesNotExist($dir);
+    }
+
+    public function testShellUploadCreateThumbnails(): void
+    {
+        $path = TMP . 'tests' . DS . 'upload' . DS;
+        $this->_createImage($path . 'image.png', 100, 50);
+
+        $this->TestUpload->Behaviors->unload('Upload');
+        $this->TestUpload->Behaviors->load('Upload.ShellUpload', [
+            'photo' => [
+                'thumbnailMethod' => 'php',
+                'thumbnailSizes' => ['thumb' => '20w'],
+            ],
+        ]);
+        $this->TestUpload->Behaviors->ShellUpload->runtime['TestUpload']['photo'] = ['type' => 'image/png'];
+        $this->TestUpload->data = ['TestUpload' => ['photo' => 'image.png']];
+        $this->TestUpload->id = 1;
+
+        $this->assertNull($this->TestUpload->Behaviors->ShellUpload->createThumbnails($this->TestUpload, 'photo', $path, $path));
+
+        $this->assertFileExists($path . 'thumb_image.png');
+        $this->assertSame([20, 10], array_slice(getimagesize($path . 'thumb_image.png'), 0, 2));
     }
 
     public function testGrabRemoteFile(): void

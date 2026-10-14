@@ -32,6 +32,6 @@ class ShellUploadBehavior extends UploadBehavior
      */
     public function createThumbnails(Model $model, $field, $path, $thumbnailPath)
     {
-        return parent::_createThumbnails($model, $field, $path, $thumbnailPath);
+        parent::_createThumbnails($model, $field, $path, $thumbnailPath);
     }
 }
