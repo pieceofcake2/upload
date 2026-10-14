@@ -1,6 +1,6 @@
 {
     "name": "pieceofcake2/upload",
-    "description": "CakePHP plugin to handle file uploading sans ridiculous automagic",
+    "description": "File upload behavior with thumbnail generation for CakePHP 2",
     "type": "cakephp-plugin",
     "keywords": ["cakephp", "cakephp2", "upload", "files", "behavior"],
     "license": "MIT",
