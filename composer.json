@@ -1,152 +1,41 @@
 {
-  "name": "josegonzalez/cakephp-upload",
-  "description": "CakePHP plugin to handle file uploading sans ridiculous automagic",
-  "type": "cakephp-plugin",
-  "keywords": [
-    "cakephp",
-    "upload",
-    "files",
-    "behavior"
-  ],
-  "homepage": "http://github.com/josegonzalez/cakephp-upload",
-  "license": "MIT",
-  "authors": [
-    {
-      "name": "Jose Diaz-Gonzalez",
-      "email": "email@josediazgonzalez.com",
-      "homepage": "http://josediazgonzalez.com",
-      "role": "Maintainer"
+    "name": "pieceofcake2/upload",
+    "description": "CakePHP plugin to handle file uploading sans ridiculous automagic",
+    "type": "cakephp-plugin",
+    "keywords": ["cakephp", "cakephp2", "upload", "files", "behavior"],
+    "license": "MIT",
+    "require": {
+        "php": ">=8.0",
+        "composer/installers": "^1.0 || ^2.0",
+        "pieceofcake2/cakephp": "^2.12"
     },
-    {
-      "name": "sdoney",
-      "role": "Contributor",
-      "homepage": "https://github.com/sdoney"
+    "require-dev": {
+        "cakephp/cakephp-codesniffer": "^5.0",
+        "phpstan/phpstan": "^2.1",
+        "phpunit/phpunit": "^9.6",
+        "pieceofcake2/app": "^2.2",
+        "pieceofcake2/phpstan-cakephp2": "^0.2.1"
     },
-    {
-      "name": "Giuliano B",
-      "role": "Contributor",
-      "homepage": "https://github.com/giulianob"
+    "suggest": {
+        "ext-gd": "For GD-based thumbnail creation",
+        "ext-imagick": "For Imagick-based thumbnail creation"
     },
-    {
-      "name": "Justin Slamka",
-      "role": "Contributor",
-      "homepage": "https://github.com/slamkajs"
+    "replace": {
+        "josegonzalez/cakephp-upload": "^1.0"
     },
-    {
-      "name": "Nathan Tyler",
-      "role": "Contributor",
-      "homepage": "https://github.com/tylerdigital"
+    "autoload-dev": {
+        "exclude-from-classmap": [
+            "vendor/pieceofcake2/app/src/Console/Command/AppShell.php"
+        ]
     },
-    {
-      "name": "Joshua Paling",
-      "role": "Contributor",
-      "homepage": "https://github.com/joshuapaling"
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "composer/installers": true,
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
     },
-    {
-      "name": "Mirko Chialastri",
-      "role": "Contributor",
-      "homepage": "https://github.com/hiryu85"
-    },
-    {
-      "name": "Benjamin Allison",
-      "role": "Contributor",
-      "homepage": "https://github.com/benjaminallison"
-    },
-    {
-      "name": "Ariel Patschiki",
-      "role": "Contributor",
-      "homepage": "https://github.com/arielpts"
-    },
-    {
-      "name": "lucfranken",
-      "role": "Contributor",
-      "homepage": "https://github.com/lucfranken"
-    },
-    {
-      "name": "cpierce",
-      "role": "Contributor",
-      "homepage": "https://github.com/cpierce"
-    },
-    {
-      "name": "Barry Chapman",
-      "role": "Contributor",
-      "homepage": "https://github.com/barrychapman"
-    },
-    {
-      "name": "Thomas Edvalson",
-      "role": "Contributor",
-      "homepage": "https://github.com/Cruel"
-    },
-    {
-      "name": "Alejandro Ibarra",
-      "role": "Contributor",
-      "homepage": "https://github.com/ajibarra"
-    },
-    {
-      "name": "simkimsia",
-      "role": "Contributor",
-      "homepage": "https://github.com/simkimsia"
-    },
-    {
-      "name": "Callum Macdonald",
-      "role": "Contributor",
-      "homepage": "https://github.com/chmac"
-    },
-    {
-      "name": "David Kullmann",
-      "role": "Contributor",
-      "homepage": "https://github.com/dkullmann"
-    },
-    {
-      "name": "Juan Basso",
-      "role": "Contributor",
-      "homepage": "https://github.com/jrbasso"
-    },
-    {
-      "name": "Marc Würth",
-      "role": "Contributor",
-      "homepage": "https://github.com/ravage84"
-    },
-    {
-      "name": "Cauan Cabral",
-      "role": "Contributor",
-      "homepage": "https://github.com/CauanCabral"
-    },
-    {
-      "name": "Bryan Crowe",
-      "role": "Contributor",
-      "homepage": "https://github.com/bcrowe"
-    },
-    {
-      "name": "Simon Brown",
-      "role": "Contributor",
-      "homepage": "https://github.com/Simes"
-    },
-    {
-      "name": "wilsolutions",
-      "role": "Contributor",
-      "homepage": "https://github.com/wilsolutions"
-    },
-    {
-      "name": "Graham Watson",
-      "role": "Contributor",
-      "homepage": "https://github.com/PhantomWatson"
-    },
-    {
-      "name": "ceallred",
-      "role": "Contributor",
-      "homepage": "https://github.com/ceallred"
+    "extra": {
+        "installer-name": "Upload"
     }
-  ],
-  "require": {
-    "composer/installers": "*"
-  },
-  "support": {
-    "email": "cakephp+upload@josediazgonzalez.com",
-    "issues": "https://github.com/josegonzalez/cakephp-upload/issues",
-    "source": "https://github.com/josegonzalez/cakephp-upload"
-  },
-  "extra": {
-    "installer-name": "Upload"
-  }
 }

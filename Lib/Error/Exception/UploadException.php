@@ -1,3 +1,4 @@
 <?php
-class UploadException extends RuntimeException {
+class UploadException extends RuntimeException
+{
 }

@@ -1,5 +1,5 @@
 <?php
 App::uses('UploadBehavior', 'Upload.Model/Behavior');
-class FileImportBehavior extends UploadBehavior {
-
+class FileImportBehavior extends UploadBehavior
+{
 }
