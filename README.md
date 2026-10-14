@@ -1,6 +1,6 @@
 # Upload Plugin
 
-[![GitHub License](https://img.shields.io/github/license/pieceofcake2/upload?label=License)](LICENSE.txt)
+[![GitHub License](https://img.shields.io/github/license/pieceofcake2/upload?label=License)](LICENSE)
 [![Packagist Version](https://img.shields.io/packagist/v/pieceofcake2/upload?label=Packagist)](https://packagist.org/packages/pieceofcake2/upload)
 ![PHP](https://img.shields.io/packagist/dependency-v/pieceofcake2/upload/php?logo=php&logoColor=%23FFFFFF&label=PHP&labelColor=%23777BB4&color=%23FFFFFF)
 ![CakePHP](https://img.shields.io/packagist/dependency-v/pieceofcake2/upload/pieceofcake2/cakephp?logo=cakephp&logoColor=%23FFFFFF&label=CakePHP&labelColor=%23D33C43&color=%23FFFFFF)
@@ -88,24 +88,4 @@ For documentation, please see the [docs](docs/) directory of this repository
 
 ## License
 
-The MIT License (MIT)
-
-Copyright (c) 2010 Jose Diaz-Gonzalez
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
+See [LICENSE](LICENSE) for details.
