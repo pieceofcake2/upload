@@ -1252,6 +1252,49 @@ class UploadBehaviorTest extends CakeTestCase
         ];
     }
 
+    /**
+     * Tests the Imagick resizer
+     *
+     * @dataProvider providerTestResizeImagick
+     * @param string $geometry Thumbnail geometry
+     * @param array $expected Expected width and height
+     * @return void
+     */
+    public function testResizeImagick($geometry, $expected): void
+    {
+        if (!extension_loaded('imagick')) {
+            $this->markTestSkipped('The imagick extension is not available.');
+        }
+
+        $path = TMP . 'tests' . DS . 'upload' . DS;
+        $this->_createImage($path . 'source.png', 100, 33);
+        $thumbnailPath = $path . 'thumb' . DS;
+        mkdir($thumbnailPath, 0777, true);
+
+        $this->TestUpload->Behaviors->Upload->runtime['TestUpload']['photo'] = ['type' => 'image/png'];
+        $this->TestUpload->data = ['TestUpload' => ['photo' => 'source.png']];
+        $this->TestUpload->id = 1;
+
+        $result = $this->protectedMethodCall($this->TestUpload->Behaviors->Upload, '_resizeImagick', [
+            $this->TestUpload, 'photo', $path, 'thumb', $geometry, $thumbnailPath,
+        ]);
+        $this->assertTrue($result);
+
+        // thumbnailType is false, so the extension follows the source image format
+        $thumbnail = $thumbnailPath . 'thumb_source.png';
+        $this->assertFileExists($thumbnail);
+        [$width, $height] = getimagesize($thumbnail);
+        $this->assertSame($expected, [$width, $height]);
+    }
+
+    public function providerTestResizeImagick(): array
+    {
+        return [
+            ['[40x40]', [40, 40]],
+            ['40x40', [40, 40]],
+        ];
+    }
+
     public function testCreateThumbnailsWithInvalidThumbnailMethod(): void
     {
         $this->TestUpload->uploadSettings('photo', [
