@@ -13,6 +13,13 @@ CakePHP 2 applications. It is a fork of [josegonzalez/cakephp-upload](https://gi
 (2.x branch) for [pieceofcake2/cakephp](https://github.com/pieceofcake2/cakephp), and replaces
 the `josegonzalez/cakephp-upload` package.
 
+## Documentation
+
+- Website: https://pieceofcake2.github.io/upload/
+- Markdown: [docs/README.md](docs/README.md) (for AI tools and offline reading)
+
+The Markdown documentation is also included in the Composer package, in the plugin's directory: `plugins/Upload/docs/README.md` (the location depends on your `installer-paths`). Install the package with `--dev` if you only need it for development.
+
 ## Requirements
 
 * PHP 8.0+
@@ -28,10 +35,6 @@ composer require pieceofcake2/upload
 Your application's `composer.json` must allow the `composer/installers` plugin and set
 `installer-paths`; then load the plugin and add the `Upload.Upload` behavior to your models.
 See [Installation](docs/README.md#installation) and [Usage](docs/README.md#usage).
-
-## Documentation
-
-Documentation: https://pieceofcake2.github.io/upload/
 
 ## Contributing
 
