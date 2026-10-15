@@ -154,3 +154,12 @@ Use `'thumbnailMethod' => 'php'` (GD) if the Imagick extension is not installed.
 - [Validation rules](validation.md)
 - [FileImportBehavior](file-import-behavior.md)
 - [Thumbnail shell](thumbnail-shell.md)
+
+## Origin
+
+This package is a maintained fork of
+[FriendsOfCake/cakephp-upload](https://github.com/FriendsOfCake/cakephp-upload)
+(`josegonzalez/cakephp-upload` on Packagist, last upstream version 1.3.1), originally by Jose
+Diaz-Gonzalez. It is maintained for CakePHP 2 on modern PHP by
+[pieceofcake2](https://github.com/pieceofcake2). Changes from the original are listed in the
+[commit history since the fork](https://github.com/pieceofcake2/upload/compare/f470b9b...2.x).

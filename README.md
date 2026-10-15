@@ -40,6 +40,15 @@ See [Installation](docs/README.md#installation) and [Usage](docs/README.md#usage
 
 See the [contribution guidelines](https://github.com/pieceofcake2/.github/blob/master/CONTRIBUTING.md).
 
+## Origin
+
+This package is a maintained fork of
+[FriendsOfCake/cakephp-upload](https://github.com/FriendsOfCake/cakephp-upload)
+(`josegonzalez/cakephp-upload` on Packagist, last upstream version 1.3.1), originally by Jose
+Diaz-Gonzalez. It is maintained for CakePHP 2 on modern PHP by
+[pieceofcake2](https://github.com/pieceofcake2). Changes from the original are listed in the
+[commit history since the fork](https://github.com/pieceofcake2/upload/compare/f470b9b...2.x).
+
 ## License
 
 MIT License. See [LICENSE](LICENSE).
