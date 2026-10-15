@@ -1,0 +1,118 @@
+# ビヘイビアの設定オプション
+
+ビヘイビアの設定で、各フィールドの下に渡せるすべての設定オプションの一覧です。
+
+- `pathMethod`: ファイルのパスに使う方式。下の `path` オプションの後ろに追加されます
+  - デフォルト: (string) `primaryKey`
+  - 選択肢:
+    - `flat`: レコードごとのパスを作成しません。ファイルは 'path' オプションの値の場所に移動されます。
+    - `primaryKey`: レコードの primaryKey にもとづいたパスが生成されます。レコードを更新しても変わりません。
+    - `random`: アップロードされたファイルごとに、`nn/nn/nn` (`nn` は乱数) という形式のランダムなパスが生成されます。レコードを更新すると変わります。
+    - `randomCombined`: アップロードされたファイルごとに、`ID/nn/nn/nn` (`ID` は現在のモデルの ID、`nn` は乱数) という形式の、モデルの id を含むランダムなパスが生成されます。レコードを更新すると変わります。
+- `path`: `rootDir` からの相対パス。`{DS}` で終わる必要があります
+  - デフォルト: (string) `'{ROOT}webroot{DS}files{DS}{model}{DS}{field}{DS}'`
+  - トークン:
+    - {ROOT}: `rootDir` オプションに置き換えられます
+    - {DS}: `DIRECTORY_SEPARATOR` に置き換えられます
+    - {model}: モデルのエイリアスに置き換えられます。
+    - {field}: フィールド名に置き換えられます。
+    - {primaryKey}: 利用できる場合は、レコードの主キーに置き換えられます。作成中の新しいレコードで使った場合の動作は未定義です。
+    - {size}: 通常のファイルのアップロード先パスで使った場合は、長さ 0 の文字列 (空文字列) に置き換えられます。リサイズしたサムネイルでのみ使えます。
+    - {geometry}: 通常のファイルのアップロード先パスで使った場合は、長さ 0 の文字列 (空文字列) に置き換えられます。リサイズしたサムネイルでのみ使えます。
+- `fields`: ファイルのアップロード時に使うフィールドの配列
+  - デフォルト: (array) `['dir' => 'dir', 'type' => 'type', 'size' => 'size']`
+  - 選択肢:
+    - dir: ディレクトリを保存するフィールド
+    - type: ファイルの種類を保存するフィールド
+    - size: ファイルサイズを保存するフィールド
+- `rootDir`: 画像の移動先のルートディレクトリ。必要に応じて `path` と `thumbnailPath` の先頭に自動的に追加されます
+  - デフォルト (string) `dirname(WWW_ROOT) . DS` (webroot の親ディレクトリ)、`WWW_ROOT` が定義されていない場合は `ROOT . DS . APP_DIR . DS`
+- `mimetypes`: バリデーションに使う MIME タイプの配列
+  - デフォルト: (array) 空
+- `extensions`: バリデーションに使う拡張子の配列
+  - デフォルト: (array) 空
+- `maxSize`: バリデーションに使う最大ファイルサイズ (バイト)
+  - デフォルト: (int) `2097152`
+- `minSize`: バリデーションに使う最小ファイルサイズ (バイト)
+  - デフォルト: (int) `8`
+- `maxHeight`: バリデーションに使う画像の最大の高さ
+  - デフォルト: (int) `0`
+- `minHeight`: バリデーションに使う画像の最小の高さ
+  - デフォルト: (int) `0`
+- `maxWidth`: バリデーションに使う画像の最大の幅
+  - デフォルト: (int) `0`
+- `minWidth`: バリデーションに使う画像の最小の幅
+  - デフォルト: (int) `0`
+- `deleteOnUpdate`: 新しいバージョンをアップロードしたときにファイルを削除するかどうか (名前の衝突によって危険な場合があります)
+  - デフォルト: (boolean) `false`
+- `thumbnails`: サムネイルを作成するかどうか
+  - デフォルト: (boolean) `true`
+- `thumbnailMethod`: サムネイルのリサイズに使う方式
+  - デフォルト: (string) `imagick`
+  - 選択肢:
+    - imagick: PHP の `imagick` 拡張モジュールを使ってサムネイルを生成します
+    - php: PHP 組み込みのメソッド (`GD` 拡張モジュール) を使ってサムネイルを生成します。BMP 画像には対応していません。
+- `thumbnailName`: サムネイルの名前の付け方
+  - デフォルト: `NULL`
+  - 注意: 名前には `{size}`、`{geometry}`、`{filename}` のトークンを使え、実際の値に自動的に置き換えられます。
+  - 注意: また、ファイルの拡張子は自動的に追加されます。
+  - 注意: 指定しない場合は、`thumbnailPrefixStyle` の値に応じて `{size}_{filename}` または `{filename}_{size}` になります
+- `thumbnailPath`: サムネイルを保存する、`rootDir` からの相対パス。`{DS}` で終わる必要があります。設定しない場合、サムネイルは `path` に保存されます。
+  - デフォルト: `NULL`
+  - トークン:
+    - {ROOT}: `rootDir` オプションに置き換えられます
+    - {DS}: `DIRECTORY_SEPARATOR` に置き換えられます
+    - {model}: モデルのエイリアスに置き換えられます
+    - {field}: フィールド名に置き換えられます
+    - {size}: 指定された `thumbnailSize` のサイズのキーに置き換えられます
+    - {geometry}: 指定された `thumbnailSize` のジオメトリの値に置き換えられます
+- `thumbnailPrefixStyle`: スタイルをサムネイルの接頭辞にするか接尾辞にするか
+  - デフォルト: (boolean) `true` サムネイルに接頭辞を付けます
+  - 設定で `thumbnailName` を指定していない場合、この設定が `thumbnailName` を上書きすることに注意してください
+- `thumbnailQuality`: 生成するサムネイルの品質 (0 から 100)。画像処理に GD を使う場合、gif 画像には対応していません。
+  - デフォルト: (int) `75`
+- `thumbnailSizes`: サムネイルのサイズの配列。サイズ名をジオメトリに対応付けます
+  - デフォルト: (array) 空
+- `thumbnailType`: 生成するサムネイルの種類を上書きします
+  - デフォルト: (mixed) `false`、アップロードがメディアファイルの場合は `png`
+  - 選択肢:
+    - 有効な任意の画像の種類
+- `mediaThumbnailType`: 画像以外のメディア (`pdfs`) で生成するサムネイルの種類を上書きします。`thumbnailType` を上書きします
+  - デフォルト: (mixed) `png`
+  - 選択肢:
+    - 有効な任意の画像の種類
+- `saveDir`: ディレクトリの保存を無効にするのに使えます
+  - デフォルト: (boolean) `true`
+  - 注意: ディレクトリの保存方法の都合上、flat 以外の `pathMethod` を使っていて `saveDir` を false にすると、ファイルが予測できない場所に置かれる場合があります。これは `pathMethod` が `primaryKey` の場合よりも `random` や `randomCombined` の場合に問題になりますが、このオプションを変更するときは注意してください
+- `deleteFolderOnDelete`: レコードの削除時に、現在のレコードに関連するフォルダーを削除します
+  - デフォルト: (boolean) `false`
+  - 注意: ディレクトリの保存方法の都合上、`pathMethod` に flat を使っている場合にこの設定を有効にすると、すべての画像が削除されます。そのため、これを true にするのは危険な場合があります。
+- `keepFilesOnDelete`: レコードのアップロード/削除時に *すべての* ファイルを残します。
+  - デフォルト: (boolean) `false`
+  - 注意: これは `deleteFolderOnDelete` を上書きしません。そちらを true にしている場合、画像が削除されることがあります。これは、既存のアップロードが (上書きされない限り) 削除されないようにするためのものです。
+- `mode`: 作成するアップロード用ディレクトリに設定する UNIX のパーミッション。
+  - デフォルト: (integer) `0777`
+- `handleUploadedFileCallback`: モデルにあるメソッドの名前を設定すると、そのモデルのメソッドがディスク上の元のファイルの移動を処理します。`thumbnailMethod` と組み合わせて、S3 など別の場所にファイルを保存するのに使えます。
+  - デフォルト: `NULL`
+  - 利用できる引数:
+    - `string $field`: 処理中のフィールド
+    - `string $filename`: アップロードされたファイルのファイル名
+    - `string $destination`: 移動したファイルの、設定された移動先
+- `nameCallback`: ファイル名の変更に使えるコールバック。現在は元のファイルの名前付けだけを扱います。
+  - デフォルト: `NULL`
+  - 利用できる引数:
+    - `string $field`: 処理中のフィールド
+    - `string $currentName`
+    - `array $data`
+    - `array options`:
+      - `isThumbnail` - サムネイルのパスを求めようとしているときに有効になる真偽値のフィールド
+      - `rootDir` - `{ROOT}` を置き換えるルートディレクトリ
+      - `geometry`
+      - `size`
+      - `thumbnailType`
+      - `thumbnailName`
+      - `thumbnailMethod`
+      - `mediaThumbnailType`
+      - `dir` フィールド名
+      - `saveType` - create、update、delete
+  - 戻り値: String - ファイルの新しい名前を返します
