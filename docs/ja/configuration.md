@@ -84,7 +84,7 @@
 - `saveDir`: ディレクトリの保存を無効にするのに使えます
   - デフォルト: (boolean) `true`
   - 注意: ディレクトリの保存方法の都合上、flat 以外の `pathMethod` を使っていて `saveDir` を false にすると、ファイルが予測できない場所に置かれる場合があります。これは `pathMethod` が `primaryKey` の場合よりも `random` や `randomCombined` の場合に問題になりますが、このオプションを変更するときは注意してください
-- `deleteFolderOnDelete`: レコードの削除時に、現在のレコードに関連するフォルダーを削除します
+- `deleteFolderOnDelete`: レコードの削除時に、現在のレコードに関連するフォルダを削除します
   - デフォルト: (boolean) `false`
   - 注意: ディレクトリの保存方法の都合上、`pathMethod` に flat を使っている場合にこの設定を有効にすると、すべての画像が削除されます。そのため、これを true にするのは危険な場合があります。
 - `keepFilesOnDelete`: レコードのアップロード/削除時に *すべての* ファイルを残します。

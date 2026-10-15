@@ -103,8 +103,8 @@ composer require pieceofcake2/upload
 
 - これをダウンロードします: <https://github.com/pieceofcake2/upload/archive/2.x.zip>
 - ダウンロードしたファイルを展開します。
-- できたフォルダーを `plugins` (レガシーレイアウトでは `app/Plugin`) にコピーします
-- コピーしたフォルダーの名前を `Upload` に変更します
+- できたフォルダを `plugins` (レガシーレイアウトでは `app/Plugin`) にコピーします
+- コピーしたフォルダの名前を `Upload` に変更します
 
 <a id="git-clone"></a>
 
