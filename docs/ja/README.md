@@ -90,11 +90,11 @@ composer require pieceofcake2/upload
 
 | レイアウト | `installer-paths` |
 | --- | --- |
-| モダン (`config/`, `src/`, `templates/`, `plugins/`) | `"plugins/{$name}/": ["type:cakephp-plugin"]` |
-| レガシー (`app/Config/`, `app/Plugin/`) | `"app/Plugin/{$name}/": ["type:cakephp-plugin"]` |
+| モダン (`config/`、`src/`、`templates/`、`plugins/`) | `"plugins/{$name}/": ["type:cakephp-plugin"]` |
+| レガシー (`app/Config/`、`app/Plugin/`) | `"app/Plugin/{$name}/": ["type:cakephp-plugin"]` |
 
 `/plugins/Upload` (レガシーレイアウトでは `/app/Plugin/Upload`) を `.gitignore` ファイルに追加することを
-おすすめします。(理由は [こちら](http://getcomposer.org/doc/faqs/should-i-commit-the-dependencies-in-my-vendor-directory.md)
+お勧めします。(理由は [こちら](http://getcomposer.org/doc/faqs/should-i-commit-the-dependencies-in-my-vendor-directory.md)
 を読んでください。)
 
 <a id="manual"></a>

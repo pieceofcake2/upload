@@ -4,7 +4,7 @@
 
 ## 基本的な例
 
-> 注意: Upload ビヘイビアは、コアの Translate ビヘイビアより *前に* 定義したほうがよいかもしれません。この二つは互いに衝突することが知られています。
+> 注意: Upload ビヘイビアは、コアの Translate ビヘイビアより *前に* 定義したほうがよいかもしれません。この 2 つは互いに衝突することが知られています。
 
 ```sql
 CREATE table users (
@@ -154,7 +154,7 @@ echo $this->Html->link('../files/example/image/' . $exampleData['Example']['dir'
 
 ## 複数のファイルのアップロード
 
-一つのレコードに複数のファイルを添付することもできます。
+1 つのレコードに複数のファイルを添付することもできます。
 
 ```php
 class User extends AppModel
@@ -219,7 +219,7 @@ echo $this->Form->input('Model.file.remove', ['type' => 'checkbox', 'label' => '
 
 <a id="saving-two-uploads-into-different-folders"></a>
 
-## 二つのアップロードを別々のフォルダに保存する
+## 2 つのアップロードを別々のフォルダに保存する
 
 複数のファイルをアップロードし、それぞれを別のフォルダに保存したい場合があります。これは実はとても
 簡単です。*ファイルごとに* ビヘイビアの設定を使うだけで、パスを変更できます。

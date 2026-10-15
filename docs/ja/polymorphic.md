@@ -120,7 +120,7 @@ class PostsController extends AppController
 ```
 
 上の例では、`Post` モデルの独自の `createWithAttachments` メソッドを呼び出しています。これで、Post を
-作成する処理を一か所にまとめられます。このメソッドは次のとおりです。
+作成する処理を 1 か所にまとめられます。このメソッドは次のとおりです。
 
 ```php
 class Post extends AppModel
@@ -178,7 +178,7 @@ echo $this->Form->input('Image.0.model', ['type' => 'hidden', 'value' => 'Post']
 echo $this->Form->end(__('Add'));
 ```
 
-一つ重要な点として、`Attachment` モデルを `Attachment` ではなく `Image` として参照していることに
+1 つ重要な点として、`Attachment` モデルを `Attachment` ではなく `Image` として参照していることに
 気付くでしょう。最初に `Attachment` と `Post` の間の `$hasMany` リレーションを指定したときに、
 `Attachment` に `Image` というエイリアスを付けました。これは、多くのポリモーフィックなモデルが互いに
 関連している場合に、CakePHP の ORM がモデルのデータを正しく参照するための一種の *ヒント* として
