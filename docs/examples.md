@@ -152,7 +152,7 @@ class User extends AppModel
 }
 ```
 
-Each key in the `Upload.Upload` array is a field name, and can **contain it's own configuration**. For example, you might want to set different fields for storing file paths:
+Each key in the `Upload.Upload` array is a field name, and can **contain its own configuration**. For example, you might want to set different fields for storing file paths:
 
 ```php
 class User extends AppModel
@@ -197,7 +197,7 @@ Sometimes you might want to upload more than one file, but upload each file into
 
 Let's assume for this example that we want to upload a picture of a user, and say, a picture of their car. For the sake of simplicity we'll also assume that these files are just stored in the `User` model.
 
-> Note: It's important to notice that each field can have it's own configuration.
+> Note: It's important to notice that each field can have its own configuration.
 
 ```php
 // src/Model/User.php (legacy layout: app/Model/User.php)

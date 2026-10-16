@@ -1,14 +1,14 @@
 # Upload Documentation
 
 The Upload plugin is an attempt to sanely upload files using techniques garnered from packages
-such as [MeioUpload](http://github.com/jrbasso/MeioUpload),
-[UploadPack](http://github.com/szajbus/cakephp-uploadpack) and
-[PHP documentation](http://php.net/manual/en/features.file-upload.php).
+such as [MeioUpload](https://github.com/jrbasso/MeioUpload),
+[UploadPack](https://github.com/szajbus/uploadpack) and
+[PHP documentation](https://www.php.net/manual/en/features.file-upload.php).
 
 pieceofcake2/upload is a fork of [josegonzalez/cakephp-upload](https://github.com/FriendsOfCake/cakephp-upload)
 (2.x branch) for [pieceofcake2/cakephp](https://github.com/pieceofcake2/cakephp). It replaces the
 `josegonzalez/cakephp-upload` package. This documentation is based on the
-[original documentation](http://cakephp-upload.readthedocs.org/en/2.x/).
+[original documentation](https://cakephp-upload.readthedocs.io/en/2.x/).
 
 - [Introduction](#introduction)
 - [Installation](#installation)
@@ -79,7 +79,7 @@ plugin and set `installer-paths`, otherwise the plugin is not installed into a d
 | Legacy (`app/Config/`, `app/Plugin/`) | `"app/Plugin/{$name}/": ["type:cakephp-plugin"]` |
 
 It is recommended that you add `/plugins/Upload` (legacy layout: `/app/Plugin/Upload`) to your
-`.gitignore` file. (Why? [read this](http://getcomposer.org/doc/faqs/should-i-commit-the-dependencies-in-my-vendor-directory.md).)
+`.gitignore` file. (Why? [read this](https://getcomposer.org/doc/faqs/should-i-commit-the-dependencies-in-my-vendor-directory.md).)
 
 ### Manual
 
@@ -98,7 +98,7 @@ git clone -b 2.x https://github.com/pieceofcake2/upload.git Upload
 
 ### Imagick Support
 
-To enable [Imagick](http://www.imagemagick.org/) support, you need to have Imagick installed:
+To enable [Imagick](https://imagemagick.org/) support, you need to have Imagick installed:
 
 ```bash
 # Debian systems

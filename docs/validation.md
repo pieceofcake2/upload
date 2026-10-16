@@ -69,7 +69,7 @@ public $validate = [
 
 ## tempDirExists
 
-Check that the PHP temporary directory is missing
+Check that the PHP temporary directory exists
 
 ```php
 public $validate = [
@@ -257,7 +257,7 @@ Check that the file is above the minimum file upload size (checked in bytes)
 public $validate = [
     'photo' => [
         'rule' => ['isAboveMinSize', 1024],
-        'message' => 'File is below the mimimum filesize',
+        'message' => 'File is below the minimum filesize',
     ],
 ];
 ```
@@ -268,7 +268,7 @@ If the argument `$requireUpload` is passed, we can skip this check when a file i
 public $validate = [
     'photo' => [
         'rule' => ['isAboveMinSize', 1024, false],
-        'message' => 'File is below the mimimum filesize',
+        'message' => 'File is below the minimum filesize',
     ],
 ];
 ```

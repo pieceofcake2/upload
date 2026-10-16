@@ -1,14 +1,14 @@
 # Upload ドキュメント
 
-Upload プラグインは、[MeioUpload](http://github.com/jrbasso/MeioUpload)、
-[UploadPack](http://github.com/szajbus/cakephp-uploadpack) などのパッケージや
-[PHP のドキュメント](http://php.net/manual/en/features.file-upload.php) から集めた手法を使って、
+Upload プラグインは、[MeioUpload](https://github.com/jrbasso/MeioUpload)、
+[UploadPack](https://github.com/szajbus/uploadpack) などのパッケージや
+[PHP のドキュメント](https://www.php.net/manual/en/features.file-upload.php) から集めた手法を使って、
 ファイルをまっとうにアップロードしようという試みです。
 
 pieceofcake2/upload は、[pieceofcake2/cakephp](https://github.com/pieceofcake2/cakephp) 向けの
 [josegonzalez/cakephp-upload](https://github.com/FriendsOfCake/cakephp-upload) (2.x ブランチ) の
 フォークです。`josegonzalez/cakephp-upload` パッケージを置き換えます。このドキュメントは
-[オリジナルのドキュメント](http://cakephp-upload.readthedocs.org/en/2.x/) をもとにしています。
+[オリジナルのドキュメント](https://cakephp-upload.readthedocs.io/en/2.x/) をもとにしています。
 
 - [はじめに](#introduction)
 - [インストール](#installation)
@@ -94,7 +94,7 @@ composer require pieceofcake2/upload
 | レガシー (`app/Config/`、`app/Plugin/`) | `"app/Plugin/{$name}/": ["type:cakephp-plugin"]` |
 
 `/plugins/Upload` (レガシーレイアウトでは `/app/Plugin/Upload`) を `.gitignore` ファイルに追加することを
-お勧めします。(理由は [こちら](http://getcomposer.org/doc/faqs/should-i-commit-the-dependencies-in-my-vendor-directory.md)
+お勧めします。(理由は [こちら](https://getcomposer.org/doc/faqs/should-i-commit-the-dependencies-in-my-vendor-directory.md)
 を読んでください。)
 
 <a id="manual"></a>
@@ -120,7 +120,7 @@ git clone -b 2.x https://github.com/pieceofcake2/upload.git Upload
 
 ### Imagick のサポート
 
-[Imagick](http://www.imagemagick.org/) のサポートを有効にするには、Imagick がインストールされている
+[Imagick](https://imagemagick.org/) のサポートを有効にするには、Imagick がインストールされている
 必要があります。
 
 ```bash

@@ -284,7 +284,7 @@ public $validate = [
 public $validate = [
     'photo' => [
         'rule' => ['isAboveMinSize', 1024],
-        'message' => 'File is below the mimimum filesize',
+        'message' => 'File is below the minimum filesize',
     ],
 ];
 ```
@@ -295,7 +295,7 @@ public $validate = [
 public $validate = [
     'photo' => [
         'rule' => ['isAboveMinSize', 1024, false],
-        'message' => 'File is below the mimimum filesize',
+        'message' => 'File is below the minimum filesize',
     ],
 ];
 ```
