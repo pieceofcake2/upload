@@ -120,7 +120,7 @@ class UploadBehaviorTest extends CakeTestCase
      * @param array $methods array of methods to mock
      * @return void
      */
-    public function mockUpload($methods = [])
+    public function mockUpload($methods = []): void
     {
         if (!is_array($methods)) {
             $methods = (array)$methods;
@@ -147,7 +147,7 @@ class UploadBehaviorTest extends CakeTestCase
      * @param array $args arguments to pass to the method
      * @return mixed
      */
-    public function protectedMethodCall($obj, $name, array $args)
+    public function protectedMethodCall($obj, $name, array $args): mixed
     {
         $class = new \ReflectionClass($obj);
         $method = $class->getMethod($name);
@@ -1152,7 +1152,7 @@ class UploadBehaviorTest extends CakeTestCase
         $this->assertEquals(4, count($result['TestUpload']));
     }
 
-    private function __testOkAndRemoveCasesValidate()
+    private function __testOkAndRemoveCasesValidate(): void
     {
         $this->__testOkCaseValidates();
         $this->__testRemoveCaseValidates();
@@ -1166,7 +1166,7 @@ class UploadBehaviorTest extends CakeTestCase
      * @param int $height Height of the image
      * @return string
      */
-    protected function _createImage($path, $width, $height)
+    protected function _createImage($path, $width, $height): string
     {
         if (!is_dir(dirname($path))) {
             mkdir(dirname($path), 0777, true);
@@ -1459,33 +1459,33 @@ class UploadBehaviorTest extends CakeTestCase
         $this->assertSame(['File was not downloaded.'], $this->TestUpload->validationErrors['photo']);
     }
 
-    private function __testValidates($data)
+    private function __testValidates($data): void
     {
         $this->TestUpload->set($data);
         $this->assertTrue($this->TestUpload->validates());
         $this->assertEquals(0, count($this->TestUpload->validationErrors));
     }
 
-    private function __testOkCaseValidates()
+    private function __testOkCaseValidates(): void
     {
         $this->__testValidates($this->data['test_ok']);
     }
 
-    private function __testRemoveCaseValidates()
+    private function __testRemoveCaseValidates(): void
     {
         $this->TestUpload->set($this->data['test_remove']);
         $this->assertTrue($this->TestUpload->validates());
         $this->assertEquals(0, count($this->TestUpload->validationErrors));
     }
 
-    private function __testSkipValidationRule($ruleName, $data)
+    private function __testSkipValidationRule($ruleName, $data): void
     {
         $this->TestUpload->set($data);
         $this->assertTrue($this->TestUpload->validates());
         $this->assertEquals(0, count($this->TestUpload->validationErrors));
     }
 
-    private function __testInvalidValidationRule($ruleName, $data)
+    private function __testInvalidValidationRule($ruleName, $data): void
     {
         $this->TestUpload->set($data);
         $this->assertFalse($this->TestUpload->validates());
